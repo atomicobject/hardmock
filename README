@@ -1,0 +1,17 @@
+
+Sun Dec 10 09:15:26 EST 2006
+crosby
+
+This was CMock, is now Hardmock.
+
+CHANGES
+* "expects" replaces "expect" ("expect" now raises Hardmock::DeprecationError)
+* "verify_mocks" is now implicit in teardown, you needn't call it anymore
+* Mocking methods that Mock would otherwise inherit from Object (eg, to_s) is now possible
+* require 'hardmock' is all that's required to use the library now; no need to include in TestCase
+
+TODO:
+* Release as GEM
+* Release as plugin
+* Mock actual methods on actual objects or classes or modules?
+* Achieve clarity on "yields"
