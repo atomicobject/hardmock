@@ -35,11 +35,8 @@ end
 
 desc "Generate and upload api docs to rubyforge"
 task :upload_doc => :rerdoc do
-	user = ENV['user']
-  user ||= "dcrosby42"
-	puts "(You can specify an different Rubyforge account by adding, eg, 'user=alles' to the command)"
-	sh "scp -r doc/* #{user}@rubyforge.org:/var/www/gforge-projects/hardmock/doc"
-	sh "scp -r homepage/* #{user}@rubyforge.org:/var/www/gforge-projects/hardmock/"
+	sh "scp -r doc/* rubyforge.org:/var/www/gforge-projects/hardmock/doc"
+	sh "scp -r homepage/* rubyforge.org:/var/www/gforge-projects/hardmock/"
 end
 
 gem_spec = Gem::Specification.new do | s |
@@ -85,9 +82,9 @@ task :release => [:alltests, :upload_doc, :repackage] do
 		raise "Please get checked-in and cleaned up before releasing.\n#{status}" unless status == ""
 
     # Tag the release by number, then re-tag for stable release (makes nicey nicey for Rails plugin installation)
-		sh "svn cp . svn+ssh://#{user}@rubyforge.org/var/svn/injection/tags/rel-#{HARDMOCK_VERSION} -m 'Releasing version #{HARDMOCK_VERSION}'"
-		sh "svn del svn+ssh://#{user}@rubyforge.org/var/svn/injection/tags/injection -m 'Preparing to update stable release tag'"
-		sh "svn cp . svn+ssh://#{user}@rubyforge.org/var/svn/injection/tags/injection -m 'Updating stable tag to version #{HARDMOCK_VERSION}'"
+		sh "svn cp . svn+ssh://rubyforge.org/var/svn/injection/tags/rel-#{HARDMOCK_VERSION} -m 'Releasing version #{HARDMOCK_VERSION}'"
+		sh "svn del svn+ssh://rubyforge.org/var/svn/injection/tags/injection -m 'Preparing to update stable release tag'"
+		sh "svn cp . svn+ssh://rubyforge.org/var/svn/injection/tags/injection -m 'Updating stable tag to version #{HARDMOCK_VERSION}'"
  
     puts "UPLOAD #{Dir['pkg/*.*']} TO RUBYFORGE RELEASE ZONE"
 	end
