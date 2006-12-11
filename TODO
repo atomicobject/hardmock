@@ -1,0 +1,11 @@
+Sun Dec 10 09:15:26 EST 2006
+crosby
+
+TODO:
+* Fix up RDoc
+** Include README, CHANGES, TODO in rdoc output
+* Release as GEM, zip and tarball
+* Create homepage for Rubyforge
+* Release as Rails plugin
+* Mock actual methods on actual objects or classes or modules?
+* Achieve clarity on "yields"

@@ -1,0 +1,8 @@
+Hardmock 1.0.3
+
+* "expects" replaces "expect" ("expect" now raises Hardmock::DeprecationError)
+* "verify_mocks" is now implicit in teardown, you needn't call it anymore
+* Mocking methods that Mock would otherwise inherit from Object (eg, to_s) is now possible
+* require 'hardmock' is all that's required to use the library now; no need to include in TestCase
+
+(previously called CMock, translated to Hardmock on 2006-12-10)
