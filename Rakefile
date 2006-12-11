@@ -35,8 +35,8 @@ end
 
 desc "Generate and upload api docs to rubyforge"
 task :upload_doc => :rerdoc do
-	sh "scp -r doc/* rubyforge.org:/var/www/gforge-projects/hardmock/doc"
-	sh "scp -r homepage/* rubyforge.org:/var/www/gforge-projects/hardmock/"
+  sh "scp -r doc/* rubyforge.org:/var/www/gforge-projects/hardmock/doc"
+  sh "scp -r homepage/* rubyforge.org:/var/www/gforge-projects/hardmock/"
 end
 
 gem_spec = Gem::Specification.new do | s |
@@ -63,29 +63,29 @@ gem_spec = Gem::Specification.new do | s |
 end
 
 Rake::GemPackageTask.new(gem_spec) do |pkg|
-	pkg.need_zip = true
-	pkg.need_tar = true
+  pkg.need_zip = true
+  pkg.need_tar = true
 end
 
 
 desc "Create a release tar.gz file."
 task :release => [:alltests, :upload_doc, :repackage] do
-	require 'fileutils'
-	include FileUtils::Verbose
-	proj_root = File.expand_path(File.dirname(__FILE__))
-	begin 
-		cd proj_root
+  require 'fileutils'
+  include FileUtils::Verbose
+  proj_root = File.expand_path(File.dirname(__FILE__))
+  begin 
+    cd proj_root
 
     # Get clean
-		sh 'svn up'
-		status = `svn status` 
-		raise "Please get checked-in and cleaned up before releasing.\n#{status}" unless status == ""
+    sh 'svn up'
+    status = `svn status` 
+    raise "Please get checked-in and cleaned up before releasing.\n#{status}" unless status == ""
 
     # Tag the release by number, then re-tag for stable release (makes nicey nicey for Rails plugin installation)
-		sh "svn cp . svn+ssh://rubyforge.org/var/svn/injection/tags/rel-#{HARDMOCK_VERSION} -m 'Releasing version #{HARDMOCK_VERSION}'"
-		sh "svn del svn+ssh://rubyforge.org/var/svn/injection/tags/injection -m 'Preparing to update stable release tag'"
-		sh "svn cp . svn+ssh://rubyforge.org/var/svn/injection/tags/injection -m 'Updating stable tag to version #{HARDMOCK_VERSION}'"
+    sh "svn cp . svn+ssh://rubyforge.org/var/svn/hardmock/tags/rel-#{HARDMOCK_VERSION} -m 'Releasing version #{HARDMOCK_VERSION}'"
+    sh "svn del svn+ssh://rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Preparing to update stable release tag'"
+    sh "svn cp . svn+ssh://rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Updating stable tag to version #{HARDMOCK_VERSION}'"
  
     puts "UPLOAD #{Dir['pkg/*.*']} TO RUBYFORGE RELEASE ZONE"
-	end
+  end
 end
