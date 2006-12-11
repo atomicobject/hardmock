@@ -67,24 +67,26 @@ Rake::GemPackageTask.new(gem_spec) do |pkg|
   pkg.need_tar = true
 end
 
+task :verify_svn_clean do
+	# Get clean
+	sh 'svn up'
+	status = `svn status` 
+	raise "Please get checked-in and cleaned up before releasing.\n#{status}" unless status == ""
+end
 
 desc "Create a release tar.gz file."
-task :release => [:alltests, :upload_doc, :repackage] do
+task :release => [:verify_svn_clean, :alltests, :upload_doc, :repackage] do
   require 'fileutils'
   include FileUtils::Verbose
   proj_root = File.expand_path(File.dirname(__FILE__))
   begin 
     cd proj_root
 
-    # Get clean
-    sh 'svn up'
-    status = `svn status` 
-    raise "Please get checked-in and cleaned up before releasing.\n#{status}" unless status == ""
 
     # Tag the release by number, then re-tag for stable release (makes nicey nicey for Rails plugin installation)
-    sh "svn cp . svn+ssh://rubyforge.org/var/svn/hardmock/tags/rel-#{HARDMOCK_VERSION} -m 'Releasing version #{HARDMOCK_VERSION}'"
-    sh "svn del svn+ssh://rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Preparing to update stable release tag'"
-    sh "svn cp . svn+ssh://rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Updating stable tag to version #{HARDMOCK_VERSION}'"
+    sh "svn cp . svn+ssh://dcrosby42@rubyforge.org/var/svn/hardmock/tags/rel-#{HARDMOCK_VERSION} -m 'Releasing version #{HARDMOCK_VERSION}'"
+    sh "svn del svn+ssh://dcrosby42@rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Preparing to update stable release tag'"
+    sh "svn cp . svn+ssh://dcrosby42@rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Updating stable tag to version #{HARDMOCK_VERSION}'"
  
     puts "UPLOAD #{Dir['pkg/*.*']} TO RUBYFORGE RELEASE ZONE"
   end
