@@ -4,8 +4,9 @@ require 'rake/rdoctask'
 require 'rubygems'
 require 'rake/gempackagetask'
 require 'rake/contrib/sshpublisher'
+require 'hoe'
 
-HARDMOCK_VERSION = "1.1.0"
+HARDMOCK_VERSION = "1.2.0"
 
 task :default => [ :alltests ]
 
@@ -39,6 +40,8 @@ task :upload_doc => :rerdoc do
   sh "scp -r homepage/* rubyforge.org:/var/www/gforge-projects/hardmock/"
 end
 
+
+
 gem_spec = Gem::Specification.new do | s |
   s.name = "hardmock"
   s.version = HARDMOCK_VERSION
@@ -49,7 +52,6 @@ gem_spec = Gem::Specification.new do | s |
   s.rubyforge_project = 'hardmock'
   s.homepage = "http://hardmock.rubyforge.org"
   s.autorequire =  'hardmock'
-  
 
   s.files = FileList['{lib,test}/**/*.rb', '[A-Z]*'].exclude('TODO').to_a
 
@@ -58,7 +60,6 @@ gem_spec = Gem::Specification.new do | s |
 
   s.has_rdoc = true
   s.extra_rdoc_files = ["README","CHANGES","LICENSE"]
-#  s.rdoc_options << '--title' << 'Harmock' << '--main' << 'README' << '--line-numbers'
   add_rdoc_options(s.rdoc_options)
 end
 

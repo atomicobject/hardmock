@@ -209,10 +209,10 @@ module Hardmock
       # If there ARE args, we set up the expectation right here and return it
       expector.send(args.shift.to_sym, *args, &block)
     end
-
-    def expect(*args, &block) #:nodoc:
-      raise DeprecationError.new("Please use 'expects' instead of 'expect'.  Sorry about the inconvenience.")
-    end
+    alias_method :expect, :expects
+#    def expect(*args, &block) #:nodoc:
+#      raise DeprecationError.new("Please use 'expects' instead of 'expect'.  Sorry about the inconvenience.")
+#    end
 
     # Special-case convenience: #trap sets up an expectation for a method
     # that will take a block.  That block, when sent to the expected method, will

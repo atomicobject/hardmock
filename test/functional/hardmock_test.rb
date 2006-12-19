@@ -351,20 +351,20 @@ class HardmockTest < Test::Unit::TestCase
 		assert_equal false, @car.ignition_on?, "Should be false"
 	end
 
-  def test_should_raise_deprecation_error_when_old_expect_called
-    create_mock :foo
-    assert_error Hardmock::DeprecationError, /expect/,/expects/,/instead of/,/sorry/i do
-      @foo.expect.something
-    end
-  end
-
   def test_should_be_able_to_mock_methods_inherited_from_object
-    target_methods = %w|to_s inspect instance_eval instance_variables id clone display dup eql? ==|
+    target_methods = %w|to_s instance_eval instance_variables id clone display dup eql? ==|
     create_mock :foo
     target_methods.each do |m|
       eval %{@foo.expects(m, "some stuff")}
       eval %{@foo.#{m} "some stuff"}
     end
+  end
+
+  def test_should_support_expect_and_should_receive_as_aliases_for_expects 
+    create_mock :foo
+    @foo.expect.boomboom
+    @foo.boomboom
+    verify_mocks 
   end
 
 end
