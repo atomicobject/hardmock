@@ -270,6 +270,4 @@ class MockTest < Test::Unit::TestCase
     mock._verify
   end
 
-
-
 end

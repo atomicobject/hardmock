@@ -4,7 +4,7 @@ require 'rake/rdoctask'
 require 'rubygems'
 require 'rake/gempackagetask'
 require 'rake/contrib/sshpublisher'
-require 'hoe'
+load 'rcov.rake'
 
 HARDMOCK_VERSION = "1.2.0"
 
@@ -91,4 +91,10 @@ task :release => [:verify_svn_clean, :alltests, :upload_doc, :repackage] do
  
     puts "UPLOAD #{Dir['pkg/*.*']} TO RUBYFORGE RELEASE ZONE"
   end
+end
+
+
+namespace :ci do
+  desc "Continuous integration target"
+  task :continuous => [ 'alltests', 'rcov:coverage' ] 
 end
