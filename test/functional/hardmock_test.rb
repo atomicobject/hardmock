@@ -352,7 +352,7 @@ class HardmockTest < Test::Unit::TestCase
 	end
 
   def test_should_be_able_to_mock_methods_inherited_from_object
-    target_methods = %w|to_s instance_eval instance_variables id clone display dup eql? ==|
+    target_methods = %w|instance_eval instance_variables id clone display dup eql? ==|
     create_mock :foo
     target_methods.each do |m|
       eval %{@foo.expects(m, "some stuff")}
@@ -367,10 +367,11 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks 
   end
 
-  def test_should_not_raise_expectation_errors_for_the_method_or_inspect_methods
+  def test_should_not_raise_expectation_errors_for_the_method_inspect_or_to_s_methods
     create_mock :foo
     inspect_method = @foo.method(:inspect)
     assert_equal @foo.inspect, inspect_method.call
+    @foo.to_s
     verify_mocks 
   end
 end
