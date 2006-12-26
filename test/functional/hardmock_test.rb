@@ -360,12 +360,18 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_support_expect_and_should_receive_as_aliases_for_expects 
+  def test_should_support_expect_as_an_alias_for_expects 
     create_mock :foo
     @foo.expect.boomboom
     @foo.boomboom
     verify_mocks 
   end
 
+  def test_should_not_raise_expectation_errors_for_the_method_or_inspect_methods
+    create_mock :foo
+    inspect_method = @foo.method(:inspect)
+    assert_equal @foo.inspect, inspect_method.call
+    verify_mocks 
+  end
 end
 

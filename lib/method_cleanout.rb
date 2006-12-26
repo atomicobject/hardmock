@@ -1,7 +1,7 @@
 
 module Hardmock #:nodoc:
   module MethodCleanout #:nodoc:
-    SACRED_METHODS = %w|__id__ __send__ equal? object_id send nil? class kind_of? respond_to? inspect|
+    SACRED_METHODS = %w|__id__ __send__ equal? object_id send nil? class kind_of? respond_to? inspect method|
 
     def self.included(base) #:nodoc:
       base.class_eval do
