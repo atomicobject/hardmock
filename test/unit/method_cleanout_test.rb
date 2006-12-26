@@ -27,7 +27,7 @@ class MethodCleanoutTest < Test::Unit::TestCase
   end
 
   def test_should_include_certain_important_methods_in_the_sacred_methods_list
-    %w|__id__ __send__ equal? object_id send nil? class kind_of? respond_to? inspect method to_s|.each do |m|
+    %w|__id__ __send__ equal? object_id send nil? class kind_of? respond_to? inspect method to_s instance_variables instance_eval|.each do |m|
       assert Hardmock::MethodCleanout::SACRED_METHODS.include?(m), "important method #{m} is not included in SACRED_METHODS"
     end
   end
