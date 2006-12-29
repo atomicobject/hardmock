@@ -19,19 +19,6 @@ class ExpectorTest < Test::Unit::TestCase
     end
   end
 
-  #
-  # TESTS
-  #
-
-  def test_method_missing
-    try_it_with 'wonder_bread'
-    try_it_with 'whatever'
-  end
-
-  def test_methods_that_wont_trigger_method_missing
-    try_it_with 'instance_eval'
-  end
-
   def try_it_with(method_name)
     mock = Object.new
     mock_control = MyControl.new
@@ -50,5 +37,20 @@ class ExpectorTest < Test::Unit::TestCase
     assert_equal "dummy expectation", output, "Expectation should have been returned"
   end
 
+  #
+  # TESTS
+  #
+  def test_method_missing
+    try_it_with 'wonder_bread'
+    try_it_with 'whatever'
+  end
 
+  def test_methods_that_wont_trigger_method_missing
+    mock = Object.new
+    mock_control = MyControl.new
+    builder = ExpBuilder.new
+
+    exp = Expector.new(mock, mock_control, builder)
+    assert_equal mock, exp.instance_eval("@mock")
+  end
 end
