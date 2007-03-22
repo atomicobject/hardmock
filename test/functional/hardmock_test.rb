@@ -376,5 +376,27 @@ class HardmockTest < Test::Unit::TestCase
     @foo.instance_eval("")
     verify_mocks 
   end
+
+  def test_should_support_raising_errors_within_expectation_blocks
+    create_mock :cat
+    @cat.expects.meow do |arg|
+      assert_equal "mix", arg
+      raise 'HAIRBALL'
+    end
+    assert_error RuntimeError, 'HAIRBALL' do 
+      @cat.meow("mix")
+    end
+  end
+
+  def test_should_support_raising_errors_after_expectation_blocks
+    create_mock :cat
+    @cat.expects.meow do |arg|
+      assert_equal "mix", arg
+    end.raises('HAIRBALL')
+    assert_error RuntimeError, 'HAIRBALL' do 
+      @cat.meow("mix")
+    end
+  end
+
 end
 
