@@ -1,7 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
-require 'hardmock'
+require 'hardmock/expector'
 
 class ExpectorTest < Test::Unit::TestCase
+  include Hardmock
 
   class MyControl
     attr_reader :added

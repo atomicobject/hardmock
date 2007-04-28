@@ -1,7 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
-require 'hardmock'
+require 'hardmock/expectation'
+require 'hardmock/errors'
 
-class SimpleExpectationTest < Test::Unit::TestCase
+class ExpectationTest < Test::Unit::TestCase
+  include Hardmock
 
   def setup
     @mock = TheMock.new
@@ -22,12 +24,12 @@ class SimpleExpectationTest < Test::Unit::TestCase
   #
 
   def test_to_s
-    ex = SimpleExpectation.new( :mock => @mock, :method => 'a_func', :arguments => [1, "two", :three, { :four => 4 }] )  
+    ex = Expectation.new( :mock => @mock, :method => 'a_func', :arguments => [1, "two", :three, { :four => 4 }] )  
     assert_equal %|the_mock.a_func(1, "two", :three, {:four=>4})|, ex.to_s
   end
    
   def test_apply_method_call
-    se = SimpleExpectation.new(:mock => @mock, :method => 'some_func',
+    se = Expectation.new(:mock => @mock, :method => 'some_func',
       :arguments => [1,'two',:three] )
 
     # Try it good:
@@ -68,7 +70,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
     # now with a proc
     thinger = nil
     the_proc = Proc.new { thinger = :shaq }
-    se = SimpleExpectation.new(:mock => @mock, :method => 'some_func',
+    se = Expectation.new(:mock => @mock, :method => 'some_func',
       :block => the_proc)
 
     # Try it good:
@@ -88,7 +90,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
       passed_block = blk 
     }
 
-    se = SimpleExpectation.new(:mock => @mock, :method => 'some_func', :block => exp_block,
+    se = Expectation.new(:mock => @mock, :method => 'some_func', :block => exp_block,
       :arguments => [])
 
     set_flag = false
@@ -109,7 +111,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_apply_method_call_fails_when_theres_no_expectation_block_to_handle_the_runtime_block
-    se = SimpleExpectation.new(:mock => @mock, :method => 'some_func', :arguments => [])
+    se = Expectation.new(:mock => @mock, :method => 'some_func', :arguments => [])
     runtime_block = Proc.new { set_flag = true }
     err = assert_raise ExpectationError do
       se.apply_method_call( @mock, 'some_func', [], runtime_block)
@@ -119,7 +121,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_returns
-    se = SimpleExpectation.new(:mock => @mock, :method => 'some_func',
+    se = Expectation.new(:mock => @mock, :method => 'some_func',
       :arguments => [1,'two',:three])
 
     se.returns "A value"
@@ -129,7 +131,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
 
   def test_apply_method_call_captures_block_value
     the_proc = lambda { "in the block" }
-    se = SimpleExpectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
+    se = Expectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
 
     assert_nil se.block_value, "Block value starts out nil"
     
@@ -143,7 +145,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
     target = false
     inner_proc = lambda { target = true }
     the_proc = lambda { inner_proc }
-    se = SimpleExpectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
+    se = Expectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
 
     assert_nil se.block_value, "Block value starts out nil"
     se.apply_method_call(@mock, 'do_it', [], nil)
@@ -159,7 +161,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
     target = nil
     inner_proc = lambda { |one,two| target = [one,two] }
     the_proc = lambda { inner_proc }
-    se = SimpleExpectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
+    se = Expectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
 
     assert_nil se.block_value, "Block value starts out nil"
     se.apply_method_call(@mock, 'do_it', [], nil)
@@ -171,7 +173,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_trigger_nil_block_value
-    se = SimpleExpectation.new(:mock => @mock, :method => 'do_it', :arguments => [])
+    se = Expectation.new(:mock => @mock, :method => 'do_it', :arguments => [])
 
     assert_nil se.block_value, "Block value starts out nil"
     se.apply_method_call(@mock, 'do_it', [], nil)
@@ -186,7 +188,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
 
   def test_trigger_non_proc_block_value
     the_block = lambda { "woops" }
-    se = SimpleExpectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_block)
+    se = Expectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_block)
 
     se.apply_method_call(@mock, 'do_it', [], nil)
     assert_equal "woops", se.block_value
@@ -203,7 +205,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
 
   def test_proc_used_for_return
     the_proc = lambda { "in the block" }
-    se = SimpleExpectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
+    se = Expectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
 
     assert_equal "in the block", se.apply_method_call(@mock, 'do_it', [], nil)
     assert_equal "in the block", se.block_value, "Captured block value affected wrongly"
@@ -211,14 +213,14 @@ class SimpleExpectationTest < Test::Unit::TestCase
 
   def test_explicit_return_overrides_proc_return
     the_proc = lambda { "in the block" }
-    se = SimpleExpectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
+    se = Expectation.new(:mock => @mock, :method => 'do_it', :arguments => [], :block => the_proc)
     se.returns "the override"
     assert_equal "the override", se.apply_method_call(@mock, 'do_it', [], nil)
     assert_equal "in the block", se.block_value, "Captured block value affected wrongly"
   end
 
   def test_yields
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
     se.yields :bean1, :bean2
 
     things = []
@@ -229,7 +231,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_yields_block_takes_no_arguments
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
     se.yields
 
     things = []
@@ -239,7 +241,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_yields_params_to_block_takes_no_arguments
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
     se.yields :wont_fit
 
     things = []
@@ -254,7 +256,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_yields_with_returns
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] ,
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] ,
       :returns => 'the results')
     
     exp = se.yields :bean1, :bean2
@@ -267,7 +269,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_yields_with_raises
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot],
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot],
       :raises => RuntimeError.new("kerboom"))
     
     exp = se.yields :bean1, :bean2
@@ -282,7 +284,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_yields_and_inner_block_explodes
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot])
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot])
     
     exp = se.yields :bean1, :bean2
     assert_same se, exp, "'yields' needs to return a reference to the expectation"
@@ -299,7 +301,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_yields_with_several_arrays
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
     se.yields ['a','b'], ['c','d']
 
     things = []
@@ -310,7 +312,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_yields_tuples
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
     se.yields ['a','b','c'], ['d','e','f']
 
     things = []
@@ -326,7 +328,7 @@ class SimpleExpectationTest < Test::Unit::TestCase
   end
 
   def test_yields_tuples_size_mismatch
-    se = SimpleExpectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
+    se = Expectation.new(:mock => @mock, :method => 'each_bean', :arguments => [:side_slot] )
     se.yields ['a','b','c'], ['d','e','f']
 
     things = []

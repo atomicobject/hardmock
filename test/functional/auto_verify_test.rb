@@ -12,72 +12,6 @@ class AutoVerifyTest < Test::Unit::TestCase
   end
 
   #
-  # HELPERS
-  #
-
-  def temp_test_file
-    File.expand_path(File.dirname(__FILE__) + "/tear_down_verification_test.rb")
-  end
-
-  def run_test(tbody)
-    File.open(temp_test_file,"w") { |f| f.print(tbody) }
-    @test_output = `ruby #{temp_test_file} 2>&1`
-#    puts "------------------------"
-#    puts @test_output
-#    puts "------------------------"
-  end
-
-  def remove_temp_test_file
-    FileUtils::rm_f temp_test_file
-  end
-
-  def assert_results(h)
-    assert_match(/#{h[:tests]} tests, [0-9]+ assertions, #{h[:failures]} failures, #{h[:errors]} errors/,
-     @test_output)
-  end
-
-  def assert_output_contains(*patterns)
-    patterns.each do |pattern|
-      assert_match(pattern,@test_output)
-    end
-  end
-  
-  def assert_output_doesnt_contain(*patterns)
-    patterns.each do |pattern|
-      assert @test_output !~ pattern, "Output shouldn't match #{pattern.inspect} but it does."
-    end
-  end
-
-  def write_and_execute_test
-    @test_code ||=<<-EOM
-        def test_setup_doomed_expectation
-          create_mock :automobile
-          @automobile.expects.start
-        end
-    EOM
-    @full_code ||=<<-EOTEST
-      require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
-      require 'hardmock'
-      class DummyTest < Test::Unit::TestCase
-        #{@teardown_code}
-        #{@test_code}
-      end 
-    EOTEST
-    run_test @full_code
-
-    if @expect_unmet_expectations 
-      assert_output_contains(/unmet expectations/i, /automobile/, /start/)
-    else
-      assert_output_doesnt_contain(/unmet expectations/i, /automobile/, /start/)
-    end
-
-    @expect_tests ||= 1
-    @expect_failures ||= 0
-    @expect_errors ||= 1
-    assert_results :tests => @expect_tests, :failures => @expect_failures, :errors => @expect_errors
-  end
-  
-  #
   # TESTS
   #
 
@@ -189,4 +123,71 @@ class AutoVerifyTest < Test::Unit::TestCase
     write_and_execute_test
     assert_output_contains(/Test helper teardown/, /User teardown/)
   end
+
+  #
+  # HELPERS
+  #
+
+  def temp_test_file
+    File.expand_path(File.dirname(__FILE__) + "/tear_down_verification_test.rb")
+  end
+
+  def run_test(tbody)
+    File.open(temp_test_file,"w") { |f| f.print(tbody) }
+    @test_output = `ruby #{temp_test_file} 2>&1`
+#    puts "------------------------"
+#    puts @test_output
+#    puts "------------------------"
+  end
+
+  def remove_temp_test_file
+    FileUtils::rm_f temp_test_file
+  end
+
+  def assert_results(h)
+    assert_match(/#{h[:tests]} tests, [0-9]+ assertions, #{h[:failures]} failures, #{h[:errors]} errors/,
+     @test_output)
+  end
+
+  def assert_output_contains(*patterns)
+    patterns.each do |pattern|
+      assert_match(pattern,@test_output)
+    end
+  end
+  
+  def assert_output_doesnt_contain(*patterns)
+    patterns.each do |pattern|
+      assert @test_output !~ pattern, "Output shouldn't match #{pattern.inspect} but it does."
+    end
+  end
+
+  def write_and_execute_test
+    @test_code ||=<<-EOM
+        def test_setup_doomed_expectation
+          create_mock :automobile
+          @automobile.expects.start
+        end
+    EOM
+    @full_code ||=<<-EOTEST
+      require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
+      require 'hardmock'
+      class DummyTest < Test::Unit::TestCase
+        #{@teardown_code}
+        #{@test_code}
+      end 
+    EOTEST
+    run_test @full_code
+
+    if @expect_unmet_expectations 
+      assert_output_contains(/unmet expectations/i, /automobile/, /start/)
+    else
+      assert_output_doesnt_contain(/unmet expectations/i, /automobile/, /start/)
+    end
+
+    @expect_tests ||= 1
+    @expect_failures ||= 0
+    @expect_errors ||= 1
+    assert_results :tests => @expect_tests, :failures => @expect_failures, :errors => @expect_errors
+  end
+  
 end

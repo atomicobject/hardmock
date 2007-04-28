@@ -1,0 +1,45 @@
+require 'hardmock/utils'
+
+module Hardmock
+  class MockControl #:nodoc:
+    include Utils
+    attr_accessor :name
+
+    def initialize
+      @expectations = []
+      @disappointed = false
+    end
+
+    def happy?
+      @expectations.empty?
+    end
+
+    def disappointed?
+      @disappointed
+    end
+
+    def add_expectation(expectation)
+      @expectations << expectation
+    end
+
+    def apply_method_call(mock,mname,args,block)
+      # Are we even expecting any sort of call?
+      if happy?
+        @disappointed = true
+        raise ExpectationError.new("Surprise call to #{format_method_call_string(mock,mname,args)}")
+      end
+
+      begin
+        @expectations.shift.apply_method_call(mock,mname,args,block)
+      rescue Exception => ouch
+        @disappointed = true
+        raise ouch
+      end
+    end
+
+    def verify
+      @disappointed = !happy?
+      raise VerifyError.new("Unmet expectations", @expectations) unless happy?
+    end
+  end
+end

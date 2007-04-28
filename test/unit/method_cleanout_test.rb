@@ -1,5 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
-require 'method_cleanout'
+require 'hardmock/method_cleanout'
 
 class MethodCleanoutTest < Test::Unit::TestCase
   class Victim

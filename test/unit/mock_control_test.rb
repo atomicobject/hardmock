@@ -1,7 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
-require 'hardmock'
+require 'hardmock/utils'
+require 'hardmock/errors'
+require 'hardmock/mock_control'
 
 class MockControlTest < Test::Unit::TestCase
+  include Hardmock
 
   def setup
     @unmock = OpenStruct.new( :_name => 'fakemock' )

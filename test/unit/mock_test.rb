@@ -1,7 +1,13 @@
 require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
-require 'hardmock'
+require 'hardmock/method_cleanout'
+require 'hardmock/mock'
+require 'hardmock/mock_control'
+require 'hardmock/expectation_builder'
+require 'hardmock/expector'
+require 'hardmock/trapper'
 
 class MockTest < Test::Unit::TestCase
+  include Hardmock
 
   def test_build_with_control
     mc1 = MockControl.new

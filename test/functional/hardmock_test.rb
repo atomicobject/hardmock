@@ -1,5 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
 require 'hardmock'
+require 'assert_error'
+
 class HardmockTest < Test::Unit::TestCase
 
   def setup
