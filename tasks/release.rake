@@ -1,4 +1,4 @@
-require 'rake/contrib/sshpublisher'
+#DELETE? require 'rake/contrib/sshpublisher'
 
 namespace :release do
 

@@ -14,8 +14,13 @@ namespace :gem do
     s.homepage = "http://hardmock.rubyforge.org"
     s.autorequire =  'hardmock'
 
-    s.files = FileList['{lib,test}/**/*.rb', '[A-Z]*'].exclude('TODO').to_a
-  #  s.files << "config/environment.rb"
+    s.files = FileList[
+      '{lib,test}/**/*.rb', 
+      'Rakefile', 
+      'config/environment.rb',
+      "tasks/test.rake",
+      "tasks/test.rake",
+    ]
 
     s.require_path = "lib"
     s.test_files = Dir.glob("test/**/*test.rb")
