@@ -69,6 +69,7 @@ module Hardmock
 
     mocks = {}
     mock_names.each do |mock_name|
+      raise ArgumentError, "'nil' is not a valid name for a mock" if mock_name.nil?
       mock_name = mock_name.to_s
       mock_object = Mock.new(mock_name, @main_mock_control)
       mocks[mock_name.to_sym] = mock_object
@@ -126,6 +127,10 @@ module Hardmock
       @name = name
       @control = mock_control || MockControl.new
       @expectation_builder = ExpectationBuilder.new
+    end
+
+    def inspect
+      "<Mock #{@name}>"
     end
 
     # Begin declaring an expectation for this Mock.

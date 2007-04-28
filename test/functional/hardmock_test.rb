@@ -398,5 +398,18 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
+  def test_should_raise_when_create_mocks_is_given_a_nil_name
+    # I make this mistake all the time: Typing in an instance var name instead of a symbol in create_mocks.
+    # When you do that, you're effectively passing nil(s) in as mock names.
+    assert_error ArgumentError, /'nil' is not a valid name for a mock/ do
+      create_mocks @apples, @oranges
+    end
+  end
+
+  def test_should_display_mock_name_in_inspect_output
+    create_mock :hay_bailer
+    assert_equal "<Mock hay_bailer>", @hay_bailer.inspect, "Wrong output from 'inspect'"
+  end
+
 end
 
