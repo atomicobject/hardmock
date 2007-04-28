@@ -1,4 +1,3 @@
-#DELETE? require 'rake/contrib/sshpublisher'
 
 namespace :release do
 
@@ -15,13 +14,10 @@ namespace :release do
   end
 
   desc "Release: tag svn version, update stable tag, build and upload docs for hardmock-#{HARDMOCK_VERSION}"
-  task :release => ["test:all", "gem:repackage", "release:verify_svn_clean", "release:upload_doc" ] do
+  task :all => ["test:all", "gem:repackage", "release:verify_svn_clean", "release:upload_doc" ] do
     require 'fileutils'
     include FileUtils::Verbose
-    proj_root = File.expand_path(File.dirname(__FILE__))
     begin 
-      cd proj_root
-
       # Tag the release by number, then re-tag for stable release (makes nicey nicey for Rails plugin installation)
       sh "svn cp . svn+ssh://dcrosby42@rubyforge.org/var/svn/hardmock/tags/rel-#{HARDMOCK_VERSION} -m 'Releasing version #{HARDMOCK_VERSION}'"
       sh "svn del svn+ssh://dcrosby42@rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Preparing to update stable release tag'"

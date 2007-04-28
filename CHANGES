@@ -1,10 +1,16 @@
-Hardmock 1.2.1
+Hardmock 1.2.2
 
 Sat Apr 28 00:41:30 EDT 2007
 
 * assert_error has been broken out into its own lib file
 * Gem package can now run all tests successfully
 * Internal code refactoring; a number of classes that were defined in hardmock.rb are now in their own files
+
+Hardmock 1.2.1
+
+Sat Apr 28 00:41:30 EDT 2007
+
+* (botched release, see 1.2.2)
 
 Hardmock 1.2.0
 
