@@ -2,6 +2,6 @@ Sun Dec 10 09:15:26 EST 2006
 crosby
 
 TODO:
-* Validate Rails plugin usage
+* Remove method_cleanout; prefer instead to use explicit method overriding like this: @my_mock.expects('to_s').returns('bogus output')
 * Mock actual methods on actual objects or classes or modules?
 * Achieve clarity on "yields"

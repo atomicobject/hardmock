@@ -1,4 +1,17 @@
-Hardmock 1.0.3
+Hardmock 1.2.1
+
+Sat Apr 28 00:41:30 EDT 2007
+
+* assert_error has been broken out into its own lib file
+* Gem package can now run all tests successfully
+* Internal code refactoring; a number of classes that were defined in hardmock.rb are now in their own files
+
+Hardmock 1.2.0
+
+* You can now use "expect" in place of "expects" if you must. 
+* "inspect" has been added to the list of methods NOT erased by MethodCleanout.
+
+Hardmock 1.1.0
 
 * "expects" replaces "expect" ("expect" now raises Hardmock::DeprecationError)
 * "verify_mocks" is now implicit in teardown, you needn't call it anymore

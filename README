@@ -7,7 +7,7 @@ Strict, ordered mock objects using very lightweight syntax in your tests.
 
 The basic procedure for using Hardmock in your tests is:
 
-* require 'hardmock'
+* require 'hardmock' (this happens automatically when being used as a Rails plugin)
 * Create some mocks
 * Setup some expectations
 * Execute the target code
