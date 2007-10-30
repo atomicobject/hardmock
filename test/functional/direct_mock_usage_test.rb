@@ -14,7 +14,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
   # TESTS
   #
 
-  def test_verify_should_raise_verify_error_if_expected_method_not_called
+  it "raises VerifyError if expected method not called" do
     @bird.expects.flap_flap
 
     err = assert_raise VerifyError do
@@ -23,7 +23,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     assert_match(/unmet expectations/i, err.message)
   end
 
-  def test_verify_should_not_raise_when_expected_calls_made_in_order
+  should "not raise when expected calls are made in order" do
     @bird.expects.flap_flap
     @bird.expects.bang
     @bird.expects.plop
@@ -35,7 +35,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_should_raise_expectation_error_when_unexpected_method_called
+  it "raises ExpectationError when unexpected method are called" do
     @bird.expects.flap_flap
 
     err = assert_raise ExpectationError do
@@ -44,7 +44,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     assert_match(/wrong method/i, err.message) 
   end
 
-  def test_bad_argument_call
+  it "raises ExpectationError on bad arguments" do
     @bird.expects.flap_flap(:swoosh)
 
     err = assert_raise ExpectationError do
@@ -53,7 +53,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     assert_match(/wrong arguments/i, err.message) 
   end
   
-  def test_verify_should_raise_verify_error_when_not_all_expected_methods_called
+  it "raises VerifyError when not all expected methods are called" do
     @bird.expects.flap_flap
     @bird.expects.bang
     @bird.expects.plop
@@ -66,7 +66,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     assert_match(/unmet expectations/i, err.message)
   end
 
-  def test_should_raise_expectation_error_when_calls_made_out_of_order
+  it "raises ExpectationError when calls are made out of order" do
     @bird.expects.flap_flap
     @bird.expects.bang
     @bird.expects.plop
@@ -78,7 +78,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     assert_match(/wrong method/i, err.message) 
   end
 
-  def test_should_return_given_value_when_specified
+  it "returns the configured value" do 
     @bird.expects.plop.returns(':P')
     assert_equal ':P', @bird.plop
     @bird._verify
@@ -88,13 +88,13 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_should_return_nil_value_when_none_specified
+  it "returns nil when no return is specified" do
     @bird.expects.plop
     assert_nil @bird.plop
     @bird._verify
   end
 
-  def test_raise_should_raise_given_exception_when_specified
+  it "raises the configured exception" do
     err = RuntimeError.new('shaq')
     @bird.expects.plop.raises(err)
     actual_err = assert_raise RuntimeError do
@@ -104,7 +104,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_raise_should_raise_given_string_wrapped_in_runtime_error
+  it "raises a RuntimeError when told to 'raise' a string" do
     @bird.expects.plop.raises('shaq')
     err = assert_raise RuntimeError do
       @bird.plop
@@ -113,7 +113,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_raise_should_raise_a_canned_runtime_error_if_nothing_given
+  it "raises a default RuntimeError" do
     @bird.expects.plop.raises
     err = assert_raise RuntimeError do
       @bird.plop
@@ -122,14 +122,14 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_should_be_happy_with_correct_expected_arguments
+  it "is quiet when correct arguments given" do
     thing = Object.new
     @bird.expects.plop(:big,'one',thing)
     @bird.plop(:big,'one',thing)
     @bird._verify
   end
 
-  def test_should_raise_expectation_error_when_wrong_number_of_arguemnts_specified
+  it "raises ExpectationError when wrong number of arguments specified" do
     thing = Object.new
     @bird.expects.plop(:big,'one',thing)
     err = assert_raise ExpectationError do
@@ -156,7 +156,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_should_raise_expectation_error_when_arguemnts_dont_match
+  it "raises ExpectationError when arguments don't match" do
     thing = Object.new
     @bird.expects.plop(:big,'one',thing)
     err = assert_raise ExpectationError do
@@ -166,7 +166,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_should_yield_to_block_given
+  it "can use a block for custom reactions" do
     mitt = nil
     @bird.expects.plop { mitt = :ball }
     assert_nil mitt
@@ -182,7 +182,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_shouldnt_care_about_arguments_if_block_given
+  it "passes mock-call arguments to the expectation block" do
     ball = nil
     mitt = nil
     @bird.expects.plop {|arg1,arg2| 
@@ -197,7 +197,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_should_check_arguments_if_specified_when_block_given
+  it "validates arguments if specified in addition to a block" do
     ball = nil
     mitt = nil
     @bird.expects.plop(:ball,:mitt) {|arg1,arg2| 
@@ -244,7 +244,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_runtime_blocks_get_passed_to_expectation_blocks
+  it "passes runtime blocks to the expectation block as the final argument" do
     runtime_block_called = false
     got_arg = nil
 
@@ -271,7 +271,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_runtime_blocks_get_passed_to_expectation_blocks__no_arguments
+  it "passes the runtime block to the expectation block as sole argument if no other args come into play" do
     runtime_block_called = false
     @bird.expects.subscribe { |block| block.call }
     @bird.subscribe do 
@@ -280,7 +280,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     assert runtime_block_called, "The runtime block should have been invoked by the user block"
   end
 
-  def test_expect_runtime_block_but_none_sent
+  it "provides nil as final argument if expectation block seems to want a block" do
     invoked = false
     @bird.expects.kablam(:scatter) { |shot,block| 
       assert_equal :scatter, shot, "Wrong shot"
@@ -293,7 +293,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_can_set_return_after_blocks
+  it "can set explicit return after an expectation block" do
     got = nil
     @bird.expects.kablam(:scatter) { |shot|
       got = shot
@@ -305,7 +305,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_can_set_raises_after_blocks
+  it "can raise after an expectation block" do
     got = nil
     @bird.expects.kablam(:scatter) do |shot|
       got = shot
@@ -319,7 +319,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_expectation_block_value_is_captured
+  it "stores the semantic value of the expectation block after it executes" do
     expectation = @bird.expects.kablam(:slug) { |shot|
       "The shot was #{shot}"
     }
@@ -336,7 +336,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
   end
 
 
-  def test_expectation_block_value_is_used_for_return_value
+  it "uses the value of the expectation block as the default return value" do 
     @bird.expects.kablam(:scatter) { |shot|
       "The shot was #{shot}"
     }
@@ -345,7 +345,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_expectation_is_still_returned_when_using_returns
+  it "returns the Expectation even if 'returns' is used" do
     expectation = @bird.expects.kablam(:slug) { |shot|
       "The shot was #{shot}"
     }.returns :hosed
@@ -361,7 +361,7 @@ class DirectMockUsageTest < Test::Unit::TestCase
     @bird._verify
   end
 
-  def test_expectation_is_still_returned_when_using_raises
+  it "returns the Expectation even if 'raises' is used" do
     expectation = @bird.expects.kablam(:slug) { |shot|
       "The shot was #{shot}"
     }.raises "aiee!"
@@ -378,13 +378,13 @@ class DirectMockUsageTest < Test::Unit::TestCase
   end
 
 
-  def test_expect_assignment
+  it "supports assignment-style methods" do
     @bird.expects.size = "large"
     @bird.size = "large"
     @bird._verify
   end
 
-  def test_expect_assignment_with_raise
+  it "supports assignments and raising (using explicit-method syntax)" do
     @bird.expects('size=','large').raises "boom"
 
     err = assert_raise RuntimeError do

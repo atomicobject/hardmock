@@ -15,11 +15,11 @@ class AutoVerifyTest < Test::Unit::TestCase
   # TESTS
   #
 
-  def test_should_auto_verify_mocks_in_teardown
+  it "auto-verifies all mocks in teardown" do
     write_and_execute_test 
   end
 
-  def test_should_auto_verify_mocks_even_if_user_has_own_teardown
+  it "auto-verifies even if user defines own teardown" do
     @teardown_code =<<-EOM 
       def teardown
         # just in the way
@@ -28,7 +28,7 @@ class AutoVerifyTest < Test::Unit::TestCase
     write_and_execute_test 
   end
 
-  def test_should_auto_verify_mocks_but_not_obscure_natural_failures
+  should "not obscure normal failures when verification fails" do
     @test_code =<<-EOM
         def test_setup_doomed_expectation
           create_mock :automobile
@@ -40,7 +40,7 @@ class AutoVerifyTest < Test::Unit::TestCase
     write_and_execute_test
   end
 
-  def test_should_not_prevent_user_teardown_even_if_verification_fails
+  should "not skip user-defined teardown when verification fails" do
     @teardown_code =<<-EOM 
       def teardown
         puts "User teardown"
@@ -50,7 +50,8 @@ class AutoVerifyTest < Test::Unit::TestCase
     assert_output_contains(/User teardown/)
   end
 
-  def test_should_not_raise_error_if_verification_goes_according_to_plan
+  it "is quiet when verification is ok" do
+#  def test_should_not_raise_error_if_verification_goes_according_to_plan
     @test_code =<<-EOM
         def test_ok
           create_mock :automobile
@@ -70,7 +71,8 @@ class AutoVerifyTest < Test::Unit::TestCase
     assert_output_contains(/User teardown/)
   end
 
-  def test_should_not_do_verification_if_user_teardown_explodes
+  should "not auto-verify if user teardown explodes" do
+#  def test_should_not_do_verification_if_user_teardown_explodes
     @teardown_code =<<-EOM 
       def teardown
         raise "self destruct"
@@ -81,7 +83,7 @@ class AutoVerifyTest < Test::Unit::TestCase
     assert_output_contains(/self destruct/)
   end
 
-  def test_should_not_obscure_inherited_teardown
+  it "plays nice with inherited teardown methods" do
     @full_code ||=<<-EOTEST
       require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
       require 'hardmock'
@@ -101,7 +103,7 @@ class AutoVerifyTest < Test::Unit::TestCase
     assert_output_contains(/Test helper teardown/)
   end
 
-  def test_should_simultaneously_support_inherited_and_user_and_hardmock_teardown
+  it "plays nice with inherited and user-defined teardowns at the same time" do
     @full_code ||=<<-EOTEST
       require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
       class Test::Unit::TestCase 
@@ -135,9 +137,6 @@ class AutoVerifyTest < Test::Unit::TestCase
   def run_test(tbody)
     File.open(temp_test_file,"w") { |f| f.print(tbody) }
     @test_output = `ruby #{temp_test_file} 2>&1`
-#    puts "------------------------"
-#    puts @test_output
-#    puts "------------------------"
   end
 
   def remove_temp_test_file

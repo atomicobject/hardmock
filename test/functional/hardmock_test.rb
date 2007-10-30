@@ -8,7 +8,7 @@ class HardmockTest < Test::Unit::TestCase
   # TESTS
   # 
 
-  def test_create_mock_and_create_mocks
+  it "conveniently creates mocks using create_mock and create_mocks" do
     assert_nil @main_mock_control, "@main_mock_control not expected yet"
 
     h = create_mock :donkey
@@ -32,7 +32,7 @@ class HardmockTest < Test::Unit::TestCase
     assert_mock_exists :donkey
   end
 
-  def test_expect
+  it "provides literal 'expects' syntax" do 
     assert_nil @order, "Should be no @order yet"
     create_mock :order
     assert_not_nil @order, "@order should be built"
@@ -50,7 +50,7 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks
   end
 
-  def test_typical_multi_mock_use
+  it "supports several mocks at once" do
     create_mocks :order_builder, :order, :customer
 
     @order_builder.expects.create_new_order.returns @order
@@ -66,7 +66,7 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks
   end
 
-  def test_typical_multi_mock_use_out_of_order
+  it "enforces inter-mock call ordering" do
     create_mocks :order_builder, :order, :customer
 
     @order_builder.expects.create_new_order.returns @order
@@ -105,7 +105,7 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_mvp_usage_pattern
+  it "makes MVP testing simple" do
     mox = create_mocks :model, :view
 
     data_change = @model.expects.when(:data_changes) { |evt,block| block }
@@ -128,7 +128,7 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks 
   end
 
-  def test_verify_mocks_repeated_anger
+  it "continues to function after verify, if verification error is controlled" do
     mox = create_mocks :model, :view
     data_change = @model.expects.when(:data_changes) { |evt,block| block }
     user_edit = @view.expects.when(:user_edited) { |evt,block| block }
@@ -177,7 +177,7 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_mvp_usage_with_failures_in_constructor
+  it "flunks for typical Presenter constructor wiring failure" do
     mox = create_mocks :model, :view
 
     data_change = @model.expects.when(:data_changes) { |evt,block| block }
@@ -200,7 +200,7 @@ class HardmockTest < Test::Unit::TestCase
 
   end
 
-  def test_mvp_usage_pattern_with_convenience_trap
+  it "provides convenient event-subscription trap syntax for MVP testing" do
     mox = create_mocks :model, :view
 
     data_change = @model.trap.when(:data_changes) 
@@ -237,7 +237,7 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_internal_iteration_usage
+  it "lets you write clear iteration-oriented expectations" do
     grinder = Grinder.new create_mocks(:blade, :chute, :bucket)
     
     # Style 1: assertions on method args is done explicitly in block
@@ -268,7 +268,7 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks
   end
 
-  def test_internal_iteration_using_yield
+  it "further supports iteration testing using 'yield'" do
     grinder = Grinder.new create_mocks(:blade, :chute, :bucket)
     
     @chute.expects.each_bean(:side_slot).yields :bean1, :bean2
@@ -300,7 +300,7 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_internal_locking_scenario
+  it "makes mutex-style locking scenarios easy to test" do
     hurt = HurtLocker.new create_mocks(:locker, :store)
 
     @locker.expects.with_lock(:main).yields
@@ -311,7 +311,7 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks
   end
 
-  def test_internal_locking_scenario_with_inner_error
+  it "makes it easy to simulate error in mutex-style locking scenarios" do 
     hurt = HurtLocker.new create_mocks(:locker, :store)
     err = StandardError.new('fmshooop')  
     @locker.expects.with_lock(:main).yields
@@ -323,7 +323,7 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks
   end
 	
-	def test_returning_false_actually_returns_false_and_not_nil
+  it "actually returns 'false' instead of nil when mocking boolean return values" do
 		create_mock :car
 		@car.expects.ignition_on?.returns(true)
 		assert_equal true, @car.ignition_on?, "Should be true"
@@ -331,7 +331,7 @@ class HardmockTest < Test::Unit::TestCase
 		assert_equal false, @car.ignition_on?, "Should be false"
 	end
 
-  def test_should_be_able_to_mock_some_methods_inherited_from_object
+  it "can mock most methods inherited from object using literal syntax" do
     target_methods = %w|id clone display dup eql? ==|
     create_mock :foo
     target_methods.each do |m|
@@ -340,14 +340,14 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_support_expect_as_an_alias_for_expects 
+  it "provides 'expect' as an alias for 'expects'" do
     create_mock :foo
     @foo.expect.boomboom
     @foo.boomboom
     verify_mocks 
   end
 
-  def test_should_not_raise_expectation_errors_for_some_methods_defined_on_object
+  it "does not interfere with a core subset of Object methods" do 
     create_mock :foo
     @foo.method(:inspect)
     @foo.inspect
@@ -357,7 +357,7 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks 
   end
 
-  def test_should_support_raising_errors_within_expectation_blocks
+  it "can raise errors from within an expectation block" do
     create_mock :cat
     @cat.expects.meow do |arg|
       assert_equal "mix", arg
@@ -368,7 +368,7 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_support_raising_errors_after_expectation_blocks
+  it "can raise errors AFTER an expectation block" do
     create_mock :cat
     @cat.expects.meow do |arg|
       assert_equal "mix", arg
@@ -378,7 +378,7 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_raise_when_create_mocks_is_given_a_nil_name
+  it "raises an immediate error if a mock is created with a nil name (common mistake: create_mock @cat)" do
     # I make this mistake all the time: Typing in an instance var name instead of a symbol in create_mocks.
     # When you do that, you're effectively passing nil(s) in as mock names.
     assert_error ArgumentError, /'nil' is not a valid name for a mock/ do
@@ -386,7 +386,7 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
-  def test_should_display_mock_name_in_inspect_output
+  it "overrides 'inspect' to make nice output" do
     create_mock :hay_bailer
     assert_equal "<Mock hay_bailer>", @hay_bailer.inspect, "Wrong output from 'inspect'"
   end

@@ -8,7 +8,7 @@ class StubbingTest < Test::Unit::TestCase
   # TESTS
   # 
 
-  def test_should_let_you_stub_a_class_method
+  it "stubs a class method" do
     assert_equal "stones and gravel", Concrete.pour
     assert_equal "glug glug", Jug.pour
 
@@ -23,14 +23,14 @@ class StubbingTest < Test::Unit::TestCase
 
     assert_equal "For roads", Concrete.describe, "'describe' method broken"
 
-    Hardmock.restore_all_stubbed_methods
+    verify_mocks
 
     assert_equal "stones and gravel", Concrete.pour, "'pour' method not restored"
     assert_equal "For roads", Concrete.describe, "'describe' method broken after verify"
 
   end
 
-  def test_should_let_you_stub_several_class_methods
+  it "stubs several class methods" do
     Concrete.stubs!(:pour).returns("sludge")
     Concrete.stubs!(:describe).returns("awful")
     Jug.stubs!(:pour).returns("milk")
@@ -39,26 +39,26 @@ class StubbingTest < Test::Unit::TestCase
     assert_equal "awful", Concrete.describe
     assert_equal "milk", Jug.pour
 
-    Hardmock.restore_all_stubbed_methods
+    verify_mocks
 
     assert_equal "stones and gravel", Concrete.pour
     assert_equal "For roads", Concrete.describe
     assert_equal "glug glug", Jug.pour
   end
 
-  def test_should_let_you_stub_instance_methods
+  it "stubs instance methods" do
     slab = Concrete.new
     assert_equal "bonk", slab.hit
 
     slab.stubs!(:hit).returns("slap")
     assert_equal "slap", slab.hit, "'hit' not stubbed"
 
-    Hardmock.restore_all_stubbed_methods
+    verify_mocks
 
     assert_equal "bonk", slab.hit, "'hit' not restored"
   end
 
-  def test_should_let_you_stub_instance_methods_without_breaking_class_methods_or_other_instances
+  it "stubs instance methods without breaking class methods or other instances" do
     slab = Concrete.new
     scrape = Concrete.new
     assert_equal "an instance", slab.describe
@@ -70,13 +70,24 @@ class StubbingTest < Test::Unit::TestCase
     assert_equal "an instance", scrape.describe, "'describe' on 'scrape' instance broken"
     assert_equal "For roads", Concrete.describe, "'describe' class method broken"
 
-    Hardmock.restore_all_stubbed_methods
+    verify_mocks
 
     assert_equal "an instance", slab.describe, "'describe' instance method not restored"
     assert_equal "an instance", scrape.describe, "'describe' on 'scrape' instance broken after restore"
     assert_equal "For roads", Concrete.describe, "'describe' class method broken after restore"
   end
 
+  should "not allow stubbing of nonexistant class methods" do
+    assert_error(Hardmock::StubbingError, /cannot stub/i, /class method/i, /Concrete.funky/) do   
+      Concrete.stubs!(:funky)
+    end
+  end
+
+  should "not allow stubbing of nonexistant instance methods" do
+    assert_error(Hardmock::StubbingError, /cannot stub/i, /method/i, /Concrete#my_inst_mth/) do   
+      Concrete.new.stubs!(:my_inst_mth)
+    end
+  end
 
   #
   # HELPERS
