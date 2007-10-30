@@ -7,6 +7,9 @@ module Hardmock
   # Raised for methods that should no longer be called.  Hopefully, the exception message contains helpful alternatives.
   class DeprecationError < StandardError; end
 
+  # Raised when stubbing fails
+  class StubbingError < StandardError; end
+
   # Raised when it is discovered that an expected method call was never made.
   class VerifyError < StandardError
     def initialize(msg,unmet_expectations)

@@ -89,6 +89,49 @@ class StubbingTest < Test::Unit::TestCase
     end
   end
 
+  it "not do anything with a runtime block" 
+
+  #
+  # Per-method mocking on classes or instances
+  #
+
+  it "mocks specific methods on existing classes" #do
+#    create_mock :dummy
+#    Concrete.expects!(:pour).returns("plooop")
+#    assert_equal "plooop", Concrete.pour
+#    verify_mocks
+#  end
+   
+  it "flunks if expected class method is not invoked" #do
+#    create_mock :dummy
+#    Concrete.expects!(:pour).returns("plooop")
+#    assert_equal "plooop", Concrete.pour
+#    assert_error(Hardmock::ExpectationError, /plooop/) do
+#      verify_mocks
+#    end
+#  end
+
+  it "supports all normal mock functionality for class methods" 
+
+  it "enforces inter-mock ordering when mocking class methods"
+
+  should "not allow mocking non-existant class methods" 
+
+  it "restores normal class method functionality after verify"
+
+  it "mocks specific methods on existing instances" 
+
+  it "flunks if expected class method is not invoked" 
+
+  it "supports all normal mock functionality for instance methods" 
+
+  it "enforces inter-mock ordering when mocking class methods"
+
+  should "not allow mocking non-existant instance methods" 
+
+  it "restores normal instance method functionality after verify"
+
+
   #
   # HELPERS
   #

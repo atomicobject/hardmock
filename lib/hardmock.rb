@@ -7,7 +7,7 @@ require 'hardmock/trapper'
 require 'hardmock/expector'
 require 'hardmock/expectation'
 require 'hardmock/expectation_builder'
-require 'hardmock/stubbed'
+require 'hardmock/stubbing'
 
 module Hardmock
 
@@ -74,7 +74,10 @@ module Hardmock
   # For more info on how to use your mocks, see Mock and Expectation
   #
   def create_mocks(*mock_names)
-    @main_mock_control ||= MockControl.new
+    if @main_mock_control.nil?
+      @main_mock_control ||= MockControl.new
+#      Hardmock.set_main_mock_control(@main_mock_control)
+    end
 
     mocks = {}
     mock_names.each do |mock_name|
@@ -102,10 +105,19 @@ module Hardmock
     return unless @main_mock_control
     return if @main_mock_control.disappointed? and !force
     @main_mock_control.verify
+  ensure
+    Hardmock.restore_all_stubbed_methods
+#    Hardmock.set_main_mock_control nil
   end
 
+#  def self.set_main_mock_control(control)
+#    $main_mock_control = control
+#  end
 
-
+#  def self.main_mock_control
+#    raise "No main mock control set yet... chickening out" if $main_mock_control.nil?
+#    $main_mock_control
+#  end
   
 end
 

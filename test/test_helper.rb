@@ -20,4 +20,23 @@ class Test::Unit::TestCase
     end
     return false
   end
+
+  def self.it(str, &block)
+    make_test_case "it #{str}", &block
+  end
+
+  def self.should(str, &block)
+    make_test_case "should #{str}", &block
+  end
+
+  def self.make_test_case(str, &block)
+    if block
+      define_method "test #{str}" do
+        instance_eval &block
+      end
+    else
+      puts ">>> UNIMPLEMENTED CASE: #{self.name.sub(/Test$/,'')}: #{str}"
+    end
+  end
+
 end

@@ -1,7 +1,7 @@
 require 'rake'
 require 'rubygems'
 
-HARDMOCK_VERSION = "1.2.3"
+HARDMOCK_VERSION = "1.3.0"
 
 Dir["lib/tasks/*.rake"].each { |f| load f }
 
