@@ -4,28 +4,6 @@ require 'assert_error'
 
 class HardmockTest < Test::Unit::TestCase
 
-  def setup
-  end
-
-  def teardown
-  end
-
-  #
-  # HELPERS
-  #
-
-  def assert_mock_exists(name)
-    assert_not_nil @all_mocks, "@all_mocks not here yet"
-    mo = @all_mocks[name]
-    assert_not_nil mo, "Mock '#{name}' not in @all_mocks"
-    assert_kind_of Mock, mo, "Wrong type of object, wanted a Mock"
-    assert_equal name.to_s, mo._name, "Mock '#{name}' had wrong name"
-    ivar = self.instance_variable_get("@#{name}")
-    assert_not_nil ivar, "Mock '#{name}' not set as ivar"
-    assert_same mo, ivar, "Mock '#{name}' ivar not same as instance in @all_mocks"
-    assert_same @main_mock_control, mo._control, "Mock '#{name}' doesn't share the main mock control"
-  end
-  
   #
   # TESTS
   # 
@@ -413,5 +391,20 @@ class HardmockTest < Test::Unit::TestCase
     assert_equal "<Mock hay_bailer>", @hay_bailer.inspect, "Wrong output from 'inspect'"
   end
 
+  #
+  # HELPERS
+  #
+
+  def assert_mock_exists(name)
+    assert_not_nil @all_mocks, "@all_mocks not here yet"
+    mo = @all_mocks[name]
+    assert_not_nil mo, "Mock '#{name}' not in @all_mocks"
+    assert_kind_of Mock, mo, "Wrong type of object, wanted a Mock"
+    assert_equal name.to_s, mo._name, "Mock '#{name}' had wrong name"
+    ivar = self.instance_variable_get("@#{name}")
+    assert_not_nil ivar, "Mock '#{name}' not set as ivar"
+    assert_same mo, ivar, "Mock '#{name}' ivar not same as instance in @all_mocks"
+    assert_same @main_mock_control, mo._control, "Mock '#{name}' doesn't share the main mock control"
+  end
 end
 

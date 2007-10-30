@@ -7,6 +7,7 @@ require 'hardmock/trapper'
 require 'hardmock/expector'
 require 'hardmock/expectation'
 require 'hardmock/expectation_builder'
+require 'hardmock/stubbed'
 
 module Hardmock
 
