@@ -19,8 +19,8 @@
     end
 
     def test_the_concrete_stubbing_and_mocking
-      SchoolBus.stubs!(:color, "yellow")
-      Entanglement.expects!(:new, "my false entanglement")
+      SchoolBus.stubs!(:color).returns("yellow")
+      Entanglement.expects!(:new, "bits n pieces").returns("my false entanglement")
       cat.expects!(:hungry).returns("meow")
     end
 
