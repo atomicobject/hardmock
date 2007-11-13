@@ -23,7 +23,7 @@ namespace :release do
       sh "svn del svn+ssh://dcrosby42@rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Preparing to update stable release tag'"
       sh "svn cp . svn+ssh://dcrosby42@rubyforge.org/var/svn/hardmock/tags/hardmock -m 'Updating stable tag to version #{HARDMOCK_VERSION}'"
    
-      puts "UPLOAD #{Dir['pkg/*.*']} TO RUBYFORGE RELEASE ZONE"
+      puts "\n!!! NOW YOU MUST UPLOAD #{Dir['pkg/*.*'].join(', ')} TO RUBYFORGE RELEASE ZONE"
     end
   end
 
