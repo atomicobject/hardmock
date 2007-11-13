@@ -86,10 +86,6 @@ class HardmockTest < Test::Unit::TestCase
     assert_error VerifyError, /unmet expectations/i do
       verify_mocks
     end
-
-    # Appease the verifier
-    @order.account_no = 1234
-    @order.save!
   end
 
   class UserPresenter
@@ -152,18 +148,11 @@ class HardmockTest < Test::Unit::TestCase
       verify_mocks(false)
     end
     
-    # Finish meeting expectations and see good verification behavior
-    @view.user_name = "Da Croz"    
-    verify_mocks
-    
     @model.expects.never_gonna_happen
     
     assert_error VerifyError, /unmet expectations/i, /never_gonna_happen/i do
       verify_mocks
     end
-
-    # Appease the verifier
-    @model.never_gonna_happen
   end
 
   class UserPresenterBroken
@@ -190,13 +179,6 @@ class HardmockTest < Test::Unit::TestCase
     end
     assert_match(/unmet expectations/i, err.message) 
     assert_match(/view.when\(:user_edited\)/i, err.message) 
-
-    assert_error VerifyError, /unmet expectations/i do
-      verify_mocks
-    end 
-
-    # Appease the verifier
-    @view.when(:user_edited)
 
   end
 

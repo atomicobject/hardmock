@@ -8,7 +8,7 @@ class StubbingTest < Test::Unit::TestCase
   # TESTS
   # 
 
-  it "stubs a class method" do
+  it "stubs a class method (and un-stubs after verify)" do
     assert_equal "stones and gravel", Concrete.pour
     assert_equal "glug glug", Jug.pour
 
@@ -89,48 +89,158 @@ class StubbingTest < Test::Unit::TestCase
     end
   end
 
-  it "not do anything with a runtime block" 
+  it "does nothing with a runtime block when simply stubbing" do
+    prepare_hardmock_control
+    slab = Concrete.new
+    slab.stubs!(:hit) do |nothing|
+      raise "BOOOMM!"
+    end
+    slab.hit
+    verify_mocks
+  end
+
 
   #
   # Per-method mocking on classes or instances
   #
 
-  it "mocks specific methods on existing classes" #do
-#    create_mock :dummy
-#    Concrete.expects!(:pour).returns("plooop")
-#    assert_equal "plooop", Concrete.pour
-#    verify_mocks
-#  end
+  it "mocks specific methods on existing classes, and returns the class method to normal after verification" do
+    prepare_hardmock_control
+    assert_equal "stones and gravel", Concrete.pour, "Concrete.pour is already messed up"
+
+    Concrete.expects!(:pour).returns("ALIGATORS")
+    assert_equal "ALIGATORS", Concrete.pour
+
+    verify_mocks
+    assert_equal "stones and gravel", Concrete.pour, "Concrete.pour not restored"
+  end
    
-  it "flunks if expected class method is not invoked" #do
-#    create_mock :dummy
-#    Concrete.expects!(:pour).returns("plooop")
-#    assert_equal "plooop", Concrete.pour
-#    assert_error(Hardmock::ExpectationError, /plooop/) do
-#      verify_mocks
-#    end
-#  end
+  it "flunks if expected class method is not invoked" do
+    prepare_hardmock_control
+    Concrete.expects!(:pour).returns("ALIGATORS")
+    assert_error(Hardmock::VerifyError, /Concrete.pour/, /unmet expectations/i) do
+      verify_mocks
+    end
+    clear_expectations
+  end
 
-  it "supports all normal mock functionality for class methods" 
+  it "supports all normal mock functionality for class methods" do
+    prepare_hardmock_control
+    Concrete.expects!(:pour, "two tons").returns("mice")
+    Concrete.expects!(:pour, "three tons").returns("cats")
+    Concrete.expects!(:pour, "four tons").raises("Can't do it")
+    Concrete.expects!(:pour) do |some, args|
+      "==#{some}+#{args}=="
+    end
 
-  it "enforces inter-mock ordering when mocking class methods"
+    assert_equal "mice", Concrete.pour("two tons")
+    assert_equal "cats", Concrete.pour("three tons")
+    assert_error(RuntimeError, /Can't do it/) do 
+      Concrete.pour("four tons")
+    end
+    assert_equal "==first+second==", Concrete.pour("first","second")
+  end
 
-  should "not allow mocking non-existant class methods" 
 
-  it "restores normal class method functionality after verify"
+  it "enforces inter-mock ordering when mocking class methods" do
+    create_mocks :truck, :foreman
+    
+    @truck.expects.backup
+    Concrete.expects!(:pour, "something")
+    @foreman.expects.shout
 
-  it "mocks specific methods on existing instances" 
+    @truck.backup
+    assert_error Hardmock::ExpectationError, /wrong/i, /expected call/i, /Concrete.pour/ do
+      @foreman.shout
+    end
+    assert_error Hardmock::VerifyError, /unmet expectations/i, /foreman.shout/ do
+      verify_mocks
+    end
+    clear_expectations
+  end
 
-  it "flunks if expected class method is not invoked" 
+  should "not allow mocking non-existant class methods" do
+    prepare_hardmock_control
+    assert_error Hardmock::StubbingError, /non-existant/, /something/ do
+      Concrete.expects!(:something)
+    end
+  end
 
-  it "supports all normal mock functionality for instance methods" 
+  it "mocks specific methods on existing instances, then restore them after verify" do
+    prepare_hardmock_control
+    slab = Concrete.new
+    assert_equal "bonk", slab.hit
 
-  it "enforces inter-mock ordering when mocking class methods"
+    slab.expects!(:hit).returns("slap")
+    assert_equal "slap", slab.hit, "'hit' not stubbed"
 
-  should "not allow mocking non-existant instance methods" 
+    verify_mocks
+    assert_equal "bonk", slab.hit, "'hit' not restored"
+  end
 
-  it "restores normal instance method functionality after verify"
+  it "flunks if expected instance method is not invoked" do
+    prepare_hardmock_control
+    slab = Concrete.new
+    slab.expects!(:hit)
 
+    assert_error Hardmock::VerifyError, /unmet expectations/i, /Concrete.hit/ do
+      verify_mocks
+    end
+    clear_expectations
+  end
+
+  it "supports all normal mock functionality for instance methods" do
+    prepare_hardmock_control
+    slab = Concrete.new
+
+    slab.expects!(:hit, "soft").returns("hey")
+    slab.expects!(:hit, "hard").returns("OOF")
+    slab.expects!(:hit).raises("stoppit")
+    slab.expects!(:hit) do |some, args|
+      "==#{some}+#{args}=="
+    end
+
+    assert_equal "hey", slab.hit("soft")
+    assert_equal "OOF", slab.hit("hard")
+    assert_error(RuntimeError, /stoppit/) do 
+      slab.hit
+    end
+    assert_equal "==first+second==", slab.hit("first","second")
+    
+  end
+
+  it "enforces inter-mock ordering when mocking instance methods" do
+    create_mocks :truck, :foreman
+    slab1 = Concrete.new
+    slab2 = Concrete.new
+
+    @truck.expects.backup
+    slab1.expects!(:hit)
+    @foreman.expects.shout
+    slab2.expects!(:hit)
+    @foreman.expects.whatever
+
+    @truck.backup
+    slab1.hit
+    @foreman.shout
+    assert_error Hardmock::ExpectationError, /wrong/i, /expected call/i, /Concrete.hit/ do
+      @foreman.whatever
+    end
+    assert_error Hardmock::VerifyError, /unmet expectations/i, /foreman.whatever/ do
+      verify_mocks
+    end
+    clear_expectations
+  end
+
+  should "not allow mocking non-existant instance methods" do
+    prepare_hardmock_control
+    slab = Concrete.new
+    assert_error Hardmock::StubbingError, /non-existant/, /something/ do
+      slab.expects!(:something)
+    end
+  end
+
+  should "support expectations that deal with runtime blocks"
 
   #
   # HELPERS

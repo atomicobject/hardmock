@@ -74,10 +74,7 @@ module Hardmock
   # For more info on how to use your mocks, see Mock and Expectation
   #
   def create_mocks(*mock_names)
-    if @main_mock_control.nil?
-      @main_mock_control ||= MockControl.new
-#      Hardmock.set_main_mock_control(@main_mock_control)
-    end
+    prepare_hardmock_control unless @main_mock_control
 
     mocks = {}
     mock_names.each do |mock_name|
@@ -93,6 +90,15 @@ module Hardmock
     return mocks.clone
   end
 
+  def prepare_hardmock_control
+    if @main_mock_control.nil?
+      @main_mock_control = MockControl.new
+      $main_mock_control = @main_mock_control
+    else
+      raise "@main_mock_control is already setup for this test!"
+    end
+  end
+
   alias :create_mock :create_mocks
 
   # Ensures that all expectations have been met.  If not, VerifyException is
@@ -106,8 +112,16 @@ module Hardmock
     return if @main_mock_control.disappointed? and !force
     @main_mock_control.verify
   ensure
+    @main_mock_control.clear_expectations if @main_mock_control
     Hardmock.restore_all_stubbed_methods
-#    Hardmock.set_main_mock_control nil
+    $main_mock_control = nil
+  end
+
+  # Purge the main MockControl of all expectations, restore all concrete stubbed/mocked methods
+  def clear_expectations
+    @main_mock_control.clear_expectations if @main_mock_control
+    Hardmock.restore_all_stubbed_methods
+    $main_mock_control = nil
   end
 
 #  def self.set_main_mock_control(control)

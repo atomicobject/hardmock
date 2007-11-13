@@ -22,20 +22,24 @@ class Test::Unit::TestCase
   end
 
   def self.it(str, &block)
-    make_test_case "it #{str}", &block
+    make_test_case "it", str, &block
   end
 
   def self.should(str, &block)
-    make_test_case "should #{str}", &block
+    make_test_case "should", str, &block
   end
 
-  def self.make_test_case(str, &block)
+  def self.make_test_case(prefix, str, &block)
+    tname = self.name.sub(/Test$/,'')
     if block
-      define_method "test #{str}" do
+      define_method "test #{prefix} #{str}" do
+#        phrase = str
+#        phrase = prefix + " " + phrase unless prefix == "it"
+#        puts "#{tname} #{phrase}..."
         instance_eval &block
       end
     else
-      puts ">>> UNIMPLEMENTED CASE: #{self.name.sub(/Test$/,'')}: #{str}"
+      puts ">>> UNIMPLEMENTED CASE: #{tname}: #{str}"
     end
   end
 

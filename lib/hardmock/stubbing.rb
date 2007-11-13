@@ -52,13 +52,16 @@ module Hardmock
   end
 
   class MockedMethod < StubbedMethod
+
     def initialize(target, method_name, mock)
       super target,method_name
       @mock = mock
     end
-    def invoke(args, &block)
-      @mock.__send__(self.method_name.to_sym, *args, &block)
+
+    def invoke(args)
+      @mock.__send__(self.method_name.to_sym, *args)
     end
+
   end
 
   class ::Object
@@ -79,33 +82,25 @@ module Hardmock
       stubbed_method
     end
 
-#    def expects!(method_name, *args, &block)
-#      _ensure_stubbable method_name
-#
-#      method_name = method_name.to_s
-#
-#      # Setup a mock 
-#      control = Hardmock.main_mock_control
-#      @_partial_mock ||= Mock.new("PartialMock-#{_my_name}", control)
-#
-#      # Install a stub that will proxy to the mock 
-#      stubbed_method = Hardmock::MockedMethod.new(self, method_name, @_partial_mock)
-#
-#      meta_eval do 
-#        alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
-#
-#        define_method(method_name) do |*args|
-#          stubbed_method.invoke(args)
-#        end
-#      end
-#
-#      expector = Expector.new(@_partial_mock, control, ExpectationBuilder.new)
-##      # If there are no args, we return the Expector, which will then be used to make an Expectation
-##      return expector if args.empty?
-##      # If there ARE args, we set up the Expectation right here and return it
-#      return expector.send(method_name, *args, &block)
-#    end
+    def expects!(method_name, *args, &block)
+      _ensure_stubbable method_name
 
+      method_name = method_name.to_s
+
+      if @_my_mock.nil?
+        @_my_mock = Mock.new(_my_name, $main_mock_control)
+        stubbed_method = Hardmock::MockedMethod.new(self, method_name, @_my_mock)
+        meta_eval do 
+          alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
+          define_method(method_name) do |*args|
+            stubbed_method.invoke(args)
+          end
+        end
+      end
+
+      return @_my_mock.expects(method_name, *args, &block)
+    end
+      
     def _ensure_stubbable(method_name)
       unless self.respond_to?(method_name.to_sym)
         msg = "Cannot stub non-existant "
@@ -121,6 +116,10 @@ module Hardmock
 
     def _my_name
       self.kind_of?(Class) ? self.name : self.class.name
+    end
+
+    def _clear_mock
+      @_my_mock = nil
     end
 
   end
@@ -139,6 +138,7 @@ module Hardmock
         sm.target.meta_eval do
           alias_method sm.method_name.to_sym, "_hardmock_original_#{sm.method_name}".to_sym 
         end
+        sm.target._clear_mock
       end
     end
   end

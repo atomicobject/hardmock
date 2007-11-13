@@ -6,8 +6,7 @@ module Hardmock
     attr_accessor :name
 
     def initialize
-      @expectations = []
-      @disappointed = false
+      clear_expectations
     end
 
     def happy?
@@ -19,6 +18,7 @@ module Hardmock
     end
 
     def add_expectation(expectation)
+#      puts "MockControl #{self.object_id.to_s(16)} adding expectation: #{expectation}"
       @expectations << expectation
     end
 
@@ -38,8 +38,16 @@ module Hardmock
     end
 
     def verify
+#      puts "MockControl #{self.object_id.to_s(16)} verify: happy? #{happy?}"
       @disappointed = !happy?
       raise VerifyError.new("Unmet expectations", @expectations) unless happy?
     end
+
+    def clear_expectations
+      @expectations = []
+      @disappointed = false
+    end
+
   end
+
 end
