@@ -138,7 +138,7 @@ end
 # Insert Hardmock functionality into the TestCase base class
 require 'test/unit/testcase'
 unless Test::Unit::TestCase.instance_methods.include?('hardmock_teardown')
-  class Test::Unit::TestCase
+  class Test::Unit::TestCase #:nodoc:#
     include Hardmock
   end
 end

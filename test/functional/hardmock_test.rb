@@ -205,6 +205,13 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks 
   end
 
+  it "raises if you try to pass an expectation block to 'trap'" do
+    create_mock :model
+    assert_error Hardmock::ExpectationError, /blocks/i, /trap/i do
+      @model.trap.when(:some_event) do raise "huh?" end
+    end
+  end
+
   class Grinder
     def initialize(objects)
       @chute = objects[:chute]
@@ -371,6 +378,14 @@ class HardmockTest < Test::Unit::TestCase
   it "overrides 'inspect' to make nice output" do
     create_mock :hay_bailer
     assert_equal "<Mock hay_bailer>", @hay_bailer.inspect, "Wrong output from 'inspect'"
+  end
+
+  it "raises is prepare_hardmock_control is invoked after create_mocks, or more than once" do
+    create_mock :hi_there
+    create_mocks :another, :one
+    assert_error RuntimeError, /already setup/ do
+      prepare_hardmock_control
+    end
   end
 
   #

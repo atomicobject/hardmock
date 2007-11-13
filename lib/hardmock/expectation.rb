@@ -176,7 +176,7 @@ module Hardmock
         # Yield once
         @options[:block] = lambda do |block|
           if block.arity != 0 and block.arity != -1
-            raise ExpectationError.new("Can't pass #{item.inspect} to block with arity #{block.arity} to <#{to_s}>")
+            raise ExpectationError.new("The given block was expected to have no parameter count; instead, got #{block.arity} to <#{to_s}>")
           end
           block.call
         end

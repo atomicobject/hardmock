@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
 require 'hardmock/expectation'
 require 'hardmock/errors'
+require 'assert_error'
 
 class ExpectationTest < Test::Unit::TestCase
   include Hardmock
@@ -344,4 +345,14 @@ class ExpectationTest < Test::Unit::TestCase
     assert_match(/"a", "b", "c"/i, err.message) 
     assert_equal [], things, "Wrong things"
   end
+
+  def test_yields_bad_block_arity
+    se = Expectation.new(:mock => @mock, :method => 'do_later', :arguments => [] )
+    se.yields
+
+    assert_error Hardmock::ExpectationError, /block/i, /expected/i, /no param/i, /got 2/i do
+      se.apply_method_call(@mock,'do_later',[],lambda { |doesnt,match| raise "Surprise!" } )
+    end
+  end
+
 end

@@ -24,15 +24,42 @@ class Object #:nodoc:#
 	end
 
 	# Defines an instance method within a class
-	def class_def(name, &blk) #:nodoc:#
-		class_eval { define_method name, &blk }
-	end
+#	def class_def(name, &blk) #:nodoc:#
+#		class_eval { define_method name, &blk }
+#	end
 end
 
 
 
 module Hardmock
-  class StubbedMethod
+
+  # == Hardmock: Stubbing and Mocking Concrete Methods
+  #
+  # Hardmock lets you stub and/or mock methods on concrete classes or objects.
+  #
+  # * To "stub" a concrete method is to rig it to return the same thing always, disregarding any arguments.
+  # * To "mock" a concrete method is to surplant its funcionality by delegating to a mock object who will cover this behavior.
+  #
+  # Mocked methods have their expectations considered along with all other mock object expectations.
+  #
+  # If you use stubbing or concrete mocking in the absence (or before creation) of other mocks, you need to invoke <tt>prepare_hardmock_control</tt>.
+  # Once <tt>verify_mocks</tt> or <tt>clear_expectaions</tt> is called, the overriden behavior in the target objects is restored.
+  #
+  # == Examples
+  #
+  #   River.stubs!(:sounds_like).returns("gurgle")
+  #
+  #   River.expects!(:jump).returns("splash")
+  #
+  #   rogue.stubs!(:sounds_like).returns("pshshsh")
+  #
+  #   rogue.expects!(:rawhide_tanning_solvents).returns("giant snapping turtles")
+  #
+  module Stubbing
+    # Exists only for documentation 
+  end
+
+  class StubbedMethod #:nodoc:#
     attr_reader :target, :method_name
 
     def initialize(target, method_name)
@@ -51,7 +78,7 @@ module Hardmock
     end
   end
 
-  class MockedMethod < StubbedMethod
+  class MockedMethod < StubbedMethod #:nodoc:#
 
     def initialize(target, method_name, mock)
       super target,method_name
@@ -73,10 +100,10 @@ module Hardmock
 
       meta_eval do 
         alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
+      end
 
-        define_method(method_name) do |*args|
-          stubbed_method.invoke(args)
-        end
+      meta_def method_name do |*args|
+        stubbed_method.invoke(args)
       end
 
       stubbed_method
@@ -92,9 +119,9 @@ module Hardmock
         stubbed_method = Hardmock::MockedMethod.new(self, method_name, @_my_mock)
         meta_eval do 
           alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
-          define_method(method_name) do |*args|
-            stubbed_method.invoke(args)
-          end
+        end
+        meta_def(method_name) do |*args|
+          stubbed_method.invoke(args)
         end
       end
 
