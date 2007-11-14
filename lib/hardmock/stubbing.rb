@@ -23,6 +23,10 @@ class Object #:nodoc:#
 		meta_eval { define_method name, &blk }
 	end
 
+#  def meta_eval_string(str)
+#    metaclass.instance_eval(str)
+#  end
+
 	# Defines an instance method within a class
 #	def class_def(name, &blk) #:nodoc:#
 #		class_eval { define_method name, &blk }
@@ -98,8 +102,10 @@ module Hardmock
       method_name = method_name.to_s
       stubbed_method = Hardmock::StubbedMethod.new(self, method_name)
 
-      meta_eval do 
-        alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
+      unless _is_mock?
+        meta_eval do 
+          alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
+        end
       end
 
       meta_def method_name do |*args|
@@ -110,6 +116,9 @@ module Hardmock
     end
 
     def expects!(method_name, *args, &block)
+      if self._is_mock?
+        raise Hardmock::StubbingError, "Cannot use 'expects!(:#{method_name})' on a Mock object; try 'expects' instead"
+      end
       _ensure_stubbable method_name
 
       method_name = method_name.to_s
@@ -120,6 +129,7 @@ module Hardmock
         meta_eval do 
           alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
         end
+
         meta_def(method_name) do |*args|
           stubbed_method.invoke(args)
         end
@@ -129,7 +139,7 @@ module Hardmock
     end
       
     def _ensure_stubbable(method_name)
-      unless self.respond_to?(method_name.to_sym)
+      unless self.respond_to?(method_name.to_sym) or self._is_mock?
         msg = "Cannot stub non-existant "
         if self.kind_of?(Class) 
           msg += "class method #{_my_name}."
@@ -139,6 +149,10 @@ module Hardmock
         msg += method_name.to_s
         raise Hardmock::StubbingError.new(msg)
       end
+    end
+
+    def _is_mock?
+      self.kind_of?(Mock)
     end
 
     def _my_name
@@ -162,10 +176,12 @@ module Hardmock
 
     def restore_all_stubbed_methods
       all_stubbed_methods.each do |sm|
-        sm.target.meta_eval do
-          alias_method sm.method_name.to_sym, "_hardmock_original_#{sm.method_name}".to_sym 
+        unless sm.target._is_mock?
+          sm.target.meta_eval do
+            alias_method sm.method_name.to_sym, "_hardmock_original_#{sm.method_name}".to_sym 
+          end
+          sm.target._clear_mock
         end
-        sm.target._clear_mock
       end
     end
   end

@@ -380,7 +380,7 @@ class HardmockTest < Test::Unit::TestCase
     assert_equal "<Mock hay_bailer>", @hay_bailer.inspect, "Wrong output from 'inspect'"
   end
 
-  it "raises is prepare_hardmock_control is invoked after create_mocks, or more than once" do
+  it "raises if prepare_hardmock_control is invoked after create_mocks, or more than once" do
     create_mock :hi_there
     create_mocks :another, :one
     assert_error RuntimeError, /already setup/ do

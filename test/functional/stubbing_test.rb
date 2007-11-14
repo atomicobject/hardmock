@@ -240,7 +240,43 @@ class StubbingTest < Test::Unit::TestCase
     end
   end
 
-  should "support expectations that deal with runtime blocks"
+#  should "support concrete expectations that deal with runtime blocks" do
+#    prepare_hardmock_control
+#
+#    Concrete.expects!(:pour, "a lot") do |how_much, block|
+#      assert_equal "a lot", how_much, "Wrong how_much arg"
+#      assert_not_nil block, "nil runtime block"
+#      assert_equal "the block balue", block.call, "Wrong runtime block value"
+#    end
+#
+#    Concrete.pour("a lot") do
+#      "the block value"
+#    end
+#
+#  end
+
+  it "can stub methods on mock objects" do
+    create_mock :horse
+    @horse.stubs!(:speak).returns("silence")
+    @horse.stubs!(:hello).returns("nothing")
+    @horse.expects(:canter).returns("clip clop")
+
+    assert_equal "silence", @horse.speak
+    assert_equal "clip clop", @horse.canter
+    assert_equal "silence", @horse.speak
+    assert_equal "silence", @horse.speak
+    assert_equal "nothing", @horse.hello
+    assert_equal "nothing", @horse.hello
+
+    verify_mocks
+  end
+
+  it "will not allow expects! to be used on a mock object" do
+    create_mock :cow
+    assert_error Hardmock::StubbingError, /expects!/, /mock/i, /something/ do
+      @cow.expects!(:something)
+    end
+  end
 
   #
   # HELPERS
