@@ -15,6 +15,11 @@ module Hardmock
   # with inherited, pre-mixed or post-added user teardowns.
   def self.included(base) #:nodoc:#
     base.class_eval do 
+      # Core of our actual setup behavior
+      def hardmock_setup
+        prepare_hardmock_control
+      end
+      
       # Core of our actual teardown behavior
       def hardmock_teardown
         verify_mocks
@@ -23,6 +28,24 @@ module Hardmock
       # disable until later:
       def self.method_added(symbol) #:nodoc:
       end
+
+      if method_defined?(:setup) then
+        # Wrap existing setup
+        alias_method :old_setup, :setup
+        define_method(:new_setup) do
+          begin
+            hardmock_setup
+          ensure
+            old_setup
+          end
+        end
+      else
+        # We don't need to account for previous setup
+        define_method(:new_setup) do
+          hardmock_setup
+        end
+      end
+      alias_method :setup, :new_setup
 
       if method_defined?(:teardown) then
         # Wrap existing teardown
@@ -52,6 +75,17 @@ module Hardmock
                 new_teardown 
               ensure
                 user_teardown
+              end
+            end
+          end
+        when :setup
+          unless method_defined?(:user_setup)
+            alias_method :user_setup, :setup
+            define_method(:setup) do
+              begin
+                new_setup 
+              ensure
+                user_setup
               end
             end
           end
@@ -113,26 +147,21 @@ module Hardmock
     @main_mock_control.verify
   ensure
     @main_mock_control.clear_expectations if @main_mock_control
-    Hardmock.restore_all_replaced_methods
     $main_mock_control = nil
+    reset_stubs
   end
 
   # Purge the main MockControl of all expectations, restore all concrete stubbed/mocked methods
   def clear_expectations
     @main_mock_control.clear_expectations if @main_mock_control
-    Hardmock.restore_all_replaced_methods
+    reset_stubs
     $main_mock_control = nil
   end
 
-#  def self.set_main_mock_control(control)
-#    $main_mock_control = control
-#  end
+  def reset_stubs
+    Hardmock.restore_all_replaced_methods
+  end
 
-#  def self.main_mock_control
-#    raise "No main mock control set yet... chickening out" if $main_mock_control.nil?
-#    $main_mock_control
-#  end
-  
 end
 
 # Insert Hardmock functionality into the TestCase base class

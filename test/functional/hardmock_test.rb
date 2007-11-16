@@ -9,11 +9,9 @@ class HardmockTest < Test::Unit::TestCase
   # 
 
   it "conveniently creates mocks using create_mock and create_mocks" do
-    assert_nil @main_mock_control, "@main_mock_control not expected yet"
 
     h = create_mock :donkey
     assert_equal [ :donkey ], h.keys
-    assert_not_nil @main_mock_control, "@main_mock_control should be here"
 
     assert_mock_exists :donkey
     assert_same @donkey, h[:donkey]
