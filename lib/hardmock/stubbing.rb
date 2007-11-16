@@ -63,36 +63,32 @@ module Hardmock
     # Exists only for documentation 
   end
 
-  class StubbedMethod #:nodoc:#
+  class ReplacedMethod
     attr_reader :target, :method_name
 
     def initialize(target, method_name)
       @target = target
       @method_name = method_name
 
-      Hardmock.add_stubbed_method self
+      Hardmock.track_replaced_method self
     end
+  end
 
+  class StubbedMethod < ReplacedMethod #:nodoc:#
     def invoke(args)
+      raise @raises if @raises
       @return_value
     end
 
     def returns(stubbed_return)
       @return_value = stubbed_return
     end
-  end
 
-  class MockedMethod < StubbedMethod #:nodoc:#
-
-    def initialize(target, method_name, mock)
-      super target,method_name
-      @mock = mock
+    def raises(err)
+      err = RuntimeError.new(err) unless err.kind_of?(Exception)
+      @raises = err
+#      puts "Setup to raise #{@raises}"
     end
-
-    def invoke(args)
-      @mock.__send__(self.method_name.to_sym, *args)
-    end
-
   end
 
   class ::Object
@@ -125,14 +121,25 @@ module Hardmock
 
       if @_my_mock.nil?
         @_my_mock = Mock.new(_my_name, $main_mock_control)
-        stubbed_method = Hardmock::MockedMethod.new(self, method_name, @_my_mock)
+        Hardmock::ReplacedMethod.new(self, method_name)
+
         meta_eval do 
           alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
         end
 
-        meta_def(method_name) do |*args|
-          stubbed_method.invoke(args)
+        begin
+          $method_text_temp = %{
+            def #{method_name}(*args,&block)
+              @_my_mock.__send__(:#{method_name}, *args, &block)
+            end
+          }
+          class << self
+            eval $method_text_temp
+          end
+        ensure
+          $method_text_temp = nil
         end
+
       end
 
       return @_my_mock.expects(method_name, *args, &block)
@@ -166,21 +173,21 @@ module Hardmock
   end
 
   class << self
-    def add_stubbed_method(stubbed_method)
-      all_stubbed_methods << stubbed_method
+    def track_replaced_method(replaced_method)
+      all_replaced_methods << replaced_method
     end
 
-    def all_stubbed_methods
-      $all_stubbed_methods ||= []
+    def all_replaced_methods
+      $all_replaced_methods ||= []
     end
 
-    def restore_all_stubbed_methods
-      all_stubbed_methods.each do |sm|
-        unless sm.target._is_mock?
-          sm.target.meta_eval do
-            alias_method sm.method_name.to_sym, "_hardmock_original_#{sm.method_name}".to_sym 
+    def restore_all_replaced_methods
+      all_replaced_methods.each do |replaced|
+        unless replaced.target._is_mock?
+          replaced.target.meta_eval do
+            alias_method replaced.method_name.to_sym, "_hardmock_original_#{replaced.method_name}".to_sym 
           end
-          sm.target._clear_mock
+          replaced.target._clear_mock
         end
       end
     end

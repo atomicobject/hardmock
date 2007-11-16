@@ -113,14 +113,14 @@ module Hardmock
     @main_mock_control.verify
   ensure
     @main_mock_control.clear_expectations if @main_mock_control
-    Hardmock.restore_all_stubbed_methods
+    Hardmock.restore_all_replaced_methods
     $main_mock_control = nil
   end
 
   # Purge the main MockControl of all expectations, restore all concrete stubbed/mocked methods
   def clear_expectations
     @main_mock_control.clear_expectations if @main_mock_control
-    Hardmock.restore_all_stubbed_methods
+    Hardmock.restore_all_replaced_methods
     $main_mock_control = nil
   end
 

@@ -99,6 +99,22 @@ class StubbingTest < Test::Unit::TestCase
     verify_mocks
   end
 
+  it "can raise errors from a stubbed method" do
+    prepare_hardmock_control
+    Concrete.stubs!(:pour).raises(StandardError.new("no!"))
+    assert_error StandardError, /no!/ do
+      Concrete.pour
+    end
+  end
+
+  it "provides string syntax for convenient raising of RuntimeErrors" do
+    prepare_hardmock_control
+    Concrete.stubs!(:pour).raises("never!")
+    assert_error RuntimeError, /never!/ do
+      Concrete.pour
+    end
+  end
+
 
   #
   # Per-method mocking on classes or instances
@@ -240,20 +256,20 @@ class StubbingTest < Test::Unit::TestCase
     end
   end
 
-#  should "support concrete expectations that deal with runtime blocks" do
-#    prepare_hardmock_control
-#
-#    Concrete.expects!(:pour, "a lot") do |how_much, block|
-#      assert_equal "a lot", how_much, "Wrong how_much arg"
-#      assert_not_nil block, "nil runtime block"
-#      assert_equal "the block balue", block.call, "Wrong runtime block value"
-#    end
-#
-#    Concrete.pour("a lot") do
-#      "the block value"
-#    end
-#
-#  end
+  should "support concrete expectations that deal with runtime blocks" do
+    prepare_hardmock_control
+
+    Concrete.expects!(:pour, "a lot") do |how_much, block|
+      assert_equal "a lot", how_much, "Wrong how_much arg"
+      assert_not_nil block, "nil runtime block"
+      assert_equal "the block value", block.call, "Wrong runtime block value"
+    end
+
+    Concrete.pour("a lot") do
+      "the block value"
+    end
+
+  end
 
   it "can stub methods on mock objects" do
     create_mock :horse
