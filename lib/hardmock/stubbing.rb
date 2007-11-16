@@ -94,11 +94,13 @@ module Hardmock
   class ::Object
     def stubs!(method_name)
       _ensure_stubbable method_name
-
       method_name = method_name.to_s
+      already_stubbed = Hardmock.has_replaced_method?(self, method_name)
+
       stubbed_method = Hardmock::StubbedMethod.new(self, method_name)
 
-      unless _is_mock?
+
+      unless _is_mock? or already_stubbed
         meta_eval do 
           alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
         end
@@ -181,6 +183,13 @@ module Hardmock
       $all_replaced_methods ||= []
     end
 
+    def has_replaced_method?(obj, method_name)
+      hits = all_replaced_methods.select do |replaced|
+        (replaced.target.object_id == obj.object_id) and (replaced.method_name.to_s == method_name.to_s)
+      end
+      return !hits.empty?
+    end
+
     def restore_all_replaced_methods
       all_replaced_methods.each do |replaced|
         unless replaced.target._is_mock?
@@ -190,6 +199,7 @@ module Hardmock
           replaced.target._clear_mock
         end
       end
+      all_replaced_methods.clear
     end
   end
 

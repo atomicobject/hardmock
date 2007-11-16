@@ -89,6 +89,23 @@ class StubbingTest < Test::Unit::TestCase
     end
   end
 
+  should "allow re-stubbing" do
+    Concrete.stubs!(:pour).returns("one")
+    assert_equal "one", Concrete.pour
+
+    Concrete.stubs!(:pour).raises("hell")
+    assert_error RuntimeError, /hell/ do
+      Concrete.pour
+    end
+
+    Concrete.stubs!(:pour).returns("two")
+    assert_equal "two", Concrete.pour
+
+    verify_mocks
+
+    assert_equal "stones and gravel", Concrete.pour
+  end
+
   it "does nothing with a runtime block when simply stubbing" do
     prepare_hardmock_control
     slab = Concrete.new
