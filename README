@@ -2,7 +2,6 @@
 
 Strict, ordered mock objects using very lightweight syntax in your tests.
 
-
 == How
 
 The basic procedure for using Hardmock in your tests is:
@@ -46,3 +45,7 @@ Expects <tt>@garage.open_door</tt>, <tt>@car.start(:choke)</tt> and <tt>@car.dri
 * Rails plugin: script/plugin install 
 * SVN access: svn co svn://rubyforge.org/var/svn/hardmock/trunk
 * Developer SVN access: svn co svn://developername@rubyforge.org/var/svn/hardmock/trunk
+
+== Author
+* David Crosby (crosby at <a href="http://atomicobject.com">atomicobject.com</a>)
+* (c) 2006,2007 Atomic Object LLC 
