@@ -47,5 +47,5 @@ Expects <tt>@garage.open_door</tt>, <tt>@car.start(:choke)</tt> and <tt>@car.dri
 * Developer SVN access: svn co svn://developername@rubyforge.org/var/svn/hardmock/trunk
 
 == Author
-* David Crosby (crosby at <a href="http://atomicobject.com">atomicobject.com</a>)
+* David Crosby crosby at http://atomicobject.com
 * (c) 2006,2007 Atomic Object LLC 
