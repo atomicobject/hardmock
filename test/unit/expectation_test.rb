@@ -354,5 +354,19 @@ class ExpectationTest < Test::Unit::TestCase
       se.apply_method_call(@mock,'do_later',[],lambda { |doesnt,match| raise "Surprise!" } )
     end
   end
+  
+  def test_that_arguments_can_be_added_to_expectation
+    expectation = Expectation.new(:mock => @mock, :method => "each_bean")
+    assert_same expectation, expectation.with("jello", "for", "cosby"), "should have returned the same expectation"
+    
+    err = assert_raise ExpectationError do
+      expectation.apply_method_call(@mock, 'each_bean', [], nil)
+    end
+    assert_match(/wrong arguments/i, err.message)
+    
+    assert_nothing_raised(ExpectationError) do  
+      expectation.apply_method_call(@mock, 'each_bean', ["jello", "for", "cosby"], nil)
+    end
+  end
 
 end

@@ -64,7 +64,15 @@ module Hardmock
       @options[:returns] = val
       self
     end
-
+    
+    # Set the arguments for an expected method call.
+    # Eg,
+    #   @cash_machine.expects.deposit.with(20, "dollars").returns(:balance => "20")
+    def with(*args)
+      @options[:arguments] = args
+      self      
+    end
+    
     # Rig an expected method to raise an exception when the mock is invoked.
     #
     # Eg,
