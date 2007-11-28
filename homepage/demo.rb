@@ -7,7 +7,7 @@ class MyTest < Test::Unit::TestCase
     # Set some expectations
     @garage.expects.open_door
     @car.expects.start(:choke)
-    @car.expects.drive(:reverse, 5.mph)
+    @car.expects(:drive).with(:reverse, 5.mph) # alt syntax
     # You can also stub methods for mocks:
     @garage.stubs!(:has_roof?).returns(true)
 
