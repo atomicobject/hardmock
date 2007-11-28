@@ -48,6 +48,13 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks
   end
 
+  it "supports 'with' for specifying argument expectations" do
+    create_mocks :car
+    @car.expects(:fill).with('gas','booze')
+    @car.fill('gas', 'booze')
+    verify_mocks
+  end
+
   it "supports several mocks at once" do
     create_mocks :order_builder, :order, :customer
 
