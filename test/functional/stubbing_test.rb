@@ -303,6 +303,23 @@ class StubbingTest < Test::Unit::TestCase
     verify_mocks
     reset_stubs
   end
+  
+  it "can stub the new method and return values" do
+    Concrete.stubs!(:new).returns("this value")
+    assert_equal "this value", Concrete.new, "did not properly stub new class method"
+    reset_stubs
+  end
+  
+  it "can mock the new method and return values" do
+    Concrete.expects!(:new).with("foo").returns("hello")
+    Concrete.expects!(:new).with("bar").returns("world")
+    
+    assert_equal "hello", Concrete.new("foo"), "did not properly mock out new class method"
+    assert_equal "world", Concrete.new("bar"), "did not properly mock out new class method"
+    
+    verify_mocks
+    reset_stubs
+  end
 
   it "will not allow expects! to be used on a mock object" do
     create_mock :cow
@@ -316,6 +333,7 @@ class StubbingTest < Test::Unit::TestCase
   #
 
   class Concrete
+    def initialize; end
     def self.pour
       "stones and gravel"
     end
