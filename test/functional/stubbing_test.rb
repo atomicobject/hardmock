@@ -77,16 +77,15 @@ class StubbingTest < Test::Unit::TestCase
     assert_equal "For roads", Concrete.describe, "'describe' class method broken after restore"
   end
 
-  should "not allow stubbing of nonexistant class methods" do
-    assert_error(Hardmock::StubbingError, /cannot stub/i, /class method/i, /Concrete.funky/) do   
-      Concrete.stubs!(:funky)
-    end
+  should "allow stubbing of nonexistant class methods" do
+    Concrete.stubs!(:funky).returns('juice')
+    assert_equal 'juice', Concrete.funky
   end
 
-  should "not allow stubbing of nonexistant instance methods" do
-    assert_error(Hardmock::StubbingError, /cannot stub/i, /method/i, /Concrete#my_inst_mth/) do   
-      Concrete.new.stubs!(:my_inst_mth)
-    end
+  should "allow stubbing of nonexistant instance methods" do
+    chunk = Concrete.new
+    chunk.stubs!(:shark).returns('bite')
+    assert_equal 'bite', chunk.shark
   end
 
   should "allow re-stubbing" do
@@ -107,7 +106,6 @@ class StubbingTest < Test::Unit::TestCase
   end
 
   it "does nothing with a runtime block when simply stubbing" do
-    
     slab = Concrete.new
     slab.stubs!(:hit) do |nothing|
       raise "BOOOMM!"
@@ -117,7 +115,6 @@ class StubbingTest < Test::Unit::TestCase
   end
 
   it "can raise errors from a stubbed method" do
-    
     Concrete.stubs!(:pour).raises(StandardError.new("no!"))
     assert_error StandardError, /no!/ do
       Concrete.pour
@@ -125,7 +122,6 @@ class StubbingTest < Test::Unit::TestCase
   end
 
   it "provides string syntax for convenient raising of RuntimeErrors" do
-    
     Concrete.stubs!(:pour).raises("never!")
     assert_error RuntimeError, /never!/ do
       Concrete.pour
@@ -192,11 +188,9 @@ class StubbingTest < Test::Unit::TestCase
     clear_expectations
   end
 
-  should "not allow mocking non-existant class methods" do
-    
-    assert_error Hardmock::StubbingError, /non-existant/, /something/ do
-      Concrete.expects!(:something)
-    end
+  should "allow mocking non-existant class methods" do
+    Concrete.expects!(:something).returns("else")
+    assert_equal "else", Concrete.something
   end
 
   it "mocks specific methods on existing instances, then restore them after verify" do
@@ -265,12 +259,10 @@ class StubbingTest < Test::Unit::TestCase
     clear_expectations
   end
 
-  should "not allow mocking non-existant instance methods" do
-    
+  should "allow mocking non-existant instance methods" do
     slab = Concrete.new
-    assert_error Hardmock::StubbingError, /non-existant/, /something/ do
-      slab.expects!(:something)
-    end
+    slab.expects!(:wholly).returns('happy')
+    assert_equal 'happy', slab.wholly
   end
 
   should "support concrete expectations that deal with runtime blocks" do

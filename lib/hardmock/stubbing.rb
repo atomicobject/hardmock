@@ -87,13 +87,11 @@ module Hardmock
     def raises(err)
       err = RuntimeError.new(err) unless err.kind_of?(Exception)
       @raises = err
-#      puts "Setup to raise #{@raises}"
     end
   end
 
   class ::Object
     def stubs!(method_name)
-      _ensure_stubbable method_name
       method_name = method_name.to_s
       already_stubbed = Hardmock.has_replaced_method?(self, method_name)
 
@@ -101,8 +99,10 @@ module Hardmock
 
 
       unless _is_mock? or already_stubbed
-        meta_eval do 
-          alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
+        if methods.include?(method_name.to_s)
+          meta_eval do 
+            alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
+          end
         end
       end
 
@@ -117,7 +117,6 @@ module Hardmock
       if self._is_mock?
         raise Hardmock::StubbingError, "Cannot use 'expects!(:#{method_name})' on a Mock object; try 'expects' instead"
       end
-      _ensure_stubbable method_name
 
       method_name = method_name.to_s
 
@@ -125,8 +124,10 @@ module Hardmock
         @_my_mock = Mock.new(_my_name, $main_mock_control)
         Hardmock::ReplacedMethod.new(self, method_name)
 
-        meta_eval do 
-          alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
+        if methods.include?(method_name.to_s)
+          meta_eval do 
+            alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
+          end
         end
 
         begin
@@ -147,19 +148,6 @@ module Hardmock
       return @_my_mock.expects(method_name, *args, &block)
     end
       
-    def _ensure_stubbable(method_name)
-      unless self.respond_to?(method_name.to_sym) or self._is_mock?
-        msg = "Cannot stub non-existant "
-        if self.kind_of?(Class) 
-          msg += "class method #{_my_name}."
-        else
-          msg += "method #{_my_name}#"
-        end
-        msg += method_name.to_s
-        raise Hardmock::StubbingError.new(msg)
-      end
-    end
-
     def _is_mock?
       self.kind_of?(Mock)
     end
@@ -193,8 +181,11 @@ module Hardmock
     def restore_all_replaced_methods
       all_replaced_methods.each do |replaced|
         unless replaced.target._is_mock?
-          replaced.target.meta_eval do
-            alias_method replaced.method_name.to_sym, "_hardmock_original_#{replaced.method_name}".to_sym 
+          backed_up = "_hardmock_original_#{replaced.method_name}"
+          if replaced.target.methods.include?(backed_up)
+            replaced.target.meta_eval do
+              alias_method replaced.method_name.to_sym, backed_up.to_sym 
+            end
           end
           replaced.target._clear_mock
         end
