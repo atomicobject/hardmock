@@ -393,6 +393,14 @@ class HardmockTest < Test::Unit::TestCase
     end
   end
 
+  should "support alias verify_hardmocks" do
+    create_mock :tree
+    @tree.expects(:grow)
+    assert_error VerifyError, /unmet/i do
+      verify_hardmocks
+    end
+  end
+
   #
   # HELPERS
   #

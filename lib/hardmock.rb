@@ -150,6 +150,8 @@ module Hardmock
     $main_mock_control = nil
     reset_stubs
   end
+  
+  alias :verify_hardmocks :verify_mocks
 
   # Purge the main MockControl of all expectations, restore all concrete stubbed/mocked methods
   def clear_expectations
