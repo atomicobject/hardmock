@@ -1,36 +1,25 @@
-#
+
+
 # Stubbing support
 #
 # Stubs methods on classes and instances
 #
 
-# Why's "metaid.rb":
+# Why's "metaid.rb" stuff crunched down:
 class Object #:nodoc:#
-	# The hidden singleton lurks behind everyone
-	def metaclass #:nodoc:#
+	def hm_metaclass #:nodoc:#
     class << self
       self
     end
   end
 	
-  # Evaluate a block of code within the metaclass
-	def meta_eval(&blk) #:nodoc:#
-    metaclass.instance_eval(&blk)
+	def hm_meta_eval(&blk) #:nodoc:#
+    hm_metaclass.instance_eval(&blk)
   end
 
-	# Adds methods to a metaclass
-	def meta_def(name, &blk) #:nodoc:#
-		meta_eval { define_method name, &blk }
+	def hm_meta_def(name, &blk) #:nodoc:#
+		hm_meta_eval { define_method name, &blk }
 	end
-
-#  def meta_eval_string(str)
-#    metaclass.instance_eval(str)
-#  end
-
-	# Defines an instance method within a class
-#	def class_def(name, &blk) #:nodoc:#
-#		class_eval { define_method name, &blk }
-#	end
 end
 
 
@@ -100,13 +89,13 @@ module Hardmock
 
       unless _is_mock? or already_stubbed
         if methods.include?(method_name.to_s)
-          meta_eval do 
+          hm_meta_eval do 
             alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
           end
         end
       end
 
-      meta_def method_name do |*args|
+      hm_meta_def method_name do |*args|
         stubbed_method.invoke(args)
       end
 
@@ -125,7 +114,7 @@ module Hardmock
         Hardmock::ReplacedMethod.new(self, method_name)
 
         if methods.include?(method_name.to_s)
-          meta_eval do 
+          hm_meta_eval do 
             alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
           end
         end
@@ -183,7 +172,7 @@ module Hardmock
         unless replaced.target._is_mock?
           backed_up = "_hardmock_original_#{replaced.method_name}"
           if replaced.target.methods.include?(backed_up)
-            replaced.target.meta_eval do
+            replaced.target.hm_meta_eval do
               alias_method replaced.method_name.to_sym, backed_up.to_sym 
             end
           end
