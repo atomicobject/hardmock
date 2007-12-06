@@ -52,7 +52,7 @@ module Hardmock
     # Exists only for documentation 
   end
 
-  class ReplacedMethod
+  class ReplacedMethod #:nodoc:#
     attr_reader :target, :method_name
 
     def initialize(target, method_name)
@@ -149,6 +149,24 @@ module Hardmock
       @_my_mock = nil
     end
 
+  end
+
+  class ::NilClass
+    # Use this only if you really mean it
+    alias_method :intentionally_stubs!, :stubs!
+    
+    # Use this only if you really mean it
+    alias_method :intentionally_expects!, :expects!
+
+    # Overridden to protect against accidental nil reference self delusion 
+    def stubs!(mname)
+      raise StubbingError, "Cannot stub #{mname} method on nil.  (If you really mean to, try 'intentionally_stubs!')"
+    end
+
+    # Overridden to protect against accidental nil reference self delusion 
+    def expects!(mname, *args)
+      raise StubbingError, "Cannot mock #{mname} method on nil.  (If you really mean to, try 'intentionally_expects!')"
+    end
   end
 
   class << self

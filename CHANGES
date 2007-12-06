@@ -1,3 +1,7 @@
+Hardmock 1.3.4
+
+* Prevents accidental stubbing and mocking on NilClasses
+
 Hardmock 1.3.3
  
 * stubs! and expects! no longer require that their target methods exist in reality (this used to prevent you from stubbing methods that "exist" by virtue of "method_missing"

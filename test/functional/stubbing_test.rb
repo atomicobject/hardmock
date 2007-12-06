@@ -320,6 +320,34 @@ class StubbingTest < Test::Unit::TestCase
     end
   end
 
+  it "does not allow stubbing on nil objects" do
+    [ nil, @this_is_nil ].each do |nil_obj|
+      assert_error Hardmock::StubbingError, /cannot/i, /nil/i, /intentionally/ do
+        nil_obj.stubs!(:wont_work)
+      end
+    end
+  end
+
+  it "does not allow concrete method mocking on nil objects" do
+    [ nil, @this_is_nil ].each do |nil_obj|
+      assert_error Hardmock::StubbingError, /cannot/i, /nil/i, /intentionally/ do
+        nil_obj.expects!(:wont_work)
+      end
+    end
+  end
+
+  it "provides an alternate method for stubbing on nil objects" do
+    @this_is_nil.intentionally_stubs!(:bogus).returns('output')
+    assert_equal 'output', @this_is_nil.bogus
+  end
+
+  it "provides an alternate method for mocking concreate methods on nil objects" do
+    @this_is_nil.intentionally_expects!(:bogus).returns('output')
+    assert_error Hardmock::VerifyError, /unmet expectations/i, /NilClass.bogus/ do
+      verify_mocks
+    end
+  end
+
   #
   # HELPERS
   #
