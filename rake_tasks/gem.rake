@@ -18,9 +18,9 @@ namespace :gem do
       '{lib,test}/**/*.rb', 
       'Rakefile', 
       'config/environment.rb',
-      "lib/tasks/rdoc_options.rb",
-      "lib/tasks/rdoc.rake",
-      "lib/tasks/test.rake",
+      "rake_tasks/rdoc_options.rb",
+      "rake_tasks/rdoc.rake",
+      "rake_tasks/test.rake",
     ]
 
     s.require_path = "lib"
