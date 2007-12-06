@@ -22,7 +22,8 @@ class MethodCleanoutTest < Test::Unit::TestCase
 
   def test_should_leave_the_sacred_methods_defined
     Hardmock::MethodCleanout::SACRED_METHODS.each do |m|
-      assert @victim.respond_to?(m)
+      next if m =~ /^hm_/
+      assert @victim.respond_to?(m), "Sacred method '#{m}' was removed unexpectedly"
     end
   end
 

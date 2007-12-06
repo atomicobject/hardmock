@@ -1,3 +1,31 @@
+Hardmock 1.3.3
+ 
+* stubs! and expects! no longer require that their target methods exist in reality (this used to prevent you from stubbing methods that "exist" by virtue of "method_missing"
+* Tweaked inner metaclass code to avoid collisions with rspec's "metaid" stuff
+* Moved this project's Rake tasks into rake_tasks... otherwise Rails will load them, if Hardmock is installed as a Rails plugin
+* Alias added: 'verify_hardmocks' is now an alias for 'verify_mocks'  (some internal projects were using this modified method name as a means of cooexisting with mocha)
+
+Hardmock 1.3.2
+
+November 2007
+
+* adds 'with' as an alternate syntax for specifying argument expectations.
+
+Hardmock 1.3.1 
+
+October 2007
+
+* Can use stubs! on a mock object 
+* expects! now generates mocked methods that can safely transfer runtime blocks to the mock instance itself 
+* No longer need to call "prepare_hardmock_control" when using stubs in the absence of mocks 
+* Stubs of concrete class or instance methods are restored to original state in teardown
+
+Hardmock 1.3.0 
+
+October 2007
+
+* Adds stubs! and expects! method to all objects and classes to support concrete stubbing/mocking.
+
 Hardmock 1.2.3
 
 Sat Apr 28 01:16:15 EDT 2007
