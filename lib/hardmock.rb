@@ -9,6 +9,7 @@ require 'hardmock/expectation'
 require 'hardmock/expectation_builder'
 require 'hardmock/stubbing'
 
+
 module Hardmock
 
   # Setup auto mock verification on teardown, being careful not to interfere

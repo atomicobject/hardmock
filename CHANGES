@@ -1,3 +1,7 @@
+Hardmock 1.3.5
+
+* Aliased should_receive => expects and and_return => returns for easier transition from rspec mock and flexmock users.
+
 Hardmock 1.3.4
 
 * Prevents accidental stubbing and mocking on NilClasses

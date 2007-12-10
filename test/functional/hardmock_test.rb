@@ -341,6 +341,20 @@ class HardmockTest < Test::Unit::TestCase
     verify_mocks 
   end
 
+  it "provides 'should_receive' as an alias for 'expects'" do
+    create_mock :foo
+    @foo.should_receive.boomboom
+    @foo.boomboom
+    verify_mocks 
+  end
+
+  it "provides 'and_return' as an alias for 'returns'" do
+    create_mock :foo
+    @foo.expects(:boomboom).and_return :brick
+    assert_equal :brick, @foo.boomboom
+    verify_mocks 
+  end
+
   it "does not interfere with a core subset of Object methods" do 
     create_mock :foo
     @foo.method(:inspect)

@@ -64,6 +64,7 @@ module Hardmock
       @options[:returns] = val
       self
     end
+    alias_method :and_return, :returns
     
     # Set the arguments for an expected method call.
     # Eg,
