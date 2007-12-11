@@ -33,9 +33,6 @@ class Test::Unit::TestCase
     tname = self.name.sub(/Test$/,'')
     if block
       define_method "test #{prefix} #{str}" do
-#        phrase = str
-#        phrase = prefix + " " + phrase unless prefix == "it"
-#        puts "#{tname} #{phrase}..."
         instance_eval &block
       end
     else
