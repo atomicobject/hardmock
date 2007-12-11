@@ -51,7 +51,6 @@ class AutoVerifyTest < Test::Unit::TestCase
   end
 
   it "is quiet when verification is ok" do
-#  def test_should_not_raise_error_if_verification_goes_according_to_plan
     @test_code =<<-EOM
         def test_ok
           create_mock :automobile
@@ -71,14 +70,13 @@ class AutoVerifyTest < Test::Unit::TestCase
     assert_output_contains(/User teardown/)
   end
 
-  should "not auto-verify if user teardown explodes" do
-#  def test_should_not_do_verification_if_user_teardown_explodes
+  should "auto-verify even if user teardown explodes" do
     @teardown_code =<<-EOM 
       def teardown
         raise "self destruct"
       end
     EOM
-    @expect_unmet_expectations = false
+    @expect_errors = 2
     write_and_execute_test
     assert_output_contains(/self destruct/)
   end
@@ -103,29 +101,6 @@ class AutoVerifyTest < Test::Unit::TestCase
     assert_output_contains(/Test helper teardown/)
   end
 
-  it "plays nice with inherited and user-defined teardowns at the same time" do
-    @full_code ||=<<-EOTEST
-      require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
-      class Test::Unit::TestCase 
-        def teardown
-          puts "Test helper teardown"
-        end
-      end
-      require 'hardmock' # IMPORTANT TO DO THIS HERE, between the old and new teardown defs
-      class DummyTest < Test::Unit::TestCase
-        def teardown
-          puts "User teardown"
-        end
-        def test_prepare_to_die
-          create_mock :automobile
-          @automobile.expects.start
-        end
-      end 
-    EOTEST
-    write_and_execute_test
-    assert_output_contains(/Test helper teardown/, /User teardown/)
-  end
-
   #
   # HELPERS
   #
@@ -139,18 +114,29 @@ class AutoVerifyTest < Test::Unit::TestCase
     @test_output = `ruby #{temp_test_file} 2>&1`
   end
 
+  def formatted_test_output
+    if @test_output
+      @test_output.split(/\n/).map { |line| "> #{line}" }.join("\n")
+    else
+      "(NO TEST OUTPUT!)"
+    end
+  end
+
   def remove_temp_test_file
     FileUtils::rm_f temp_test_file
   end
 
   def assert_results(h)
-    assert_match(/#{h[:tests]} tests, [0-9]+ assertions, #{h[:failures]} failures, #{h[:errors]} errors/,
-     @test_output)
+    if @test_output !~ /#{h[:tests]} tests, [0-9]+ assertions, #{h[:failures]} failures, #{h[:errors]} errors/
+      flunk "Test results didn't match #{h.inspect}:\n#{formatted_test_output}"
+    end
   end
 
   def assert_output_contains(*patterns)
     patterns.each do |pattern|
-      assert_match(pattern,@test_output)
+      if @test_output !~ pattern
+        flunk "Test output didn't match #{pattern.inspect}:\n#{formatted_test_output}"
+      end
     end
   end
   

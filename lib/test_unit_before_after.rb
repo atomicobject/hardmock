@@ -2,40 +2,41 @@ require 'test/unit'
 require 'test/unit/testcase'
 require 'test/unit/assertions'
 
-# == TestCase Modifications
-#
-# Monkey-patch to provide a formal mechanism for appending actions to be executed after teardown.
-# Use after_teardown to define one or more actions to be executed after teardown for ALL tests.
-#
-# COMING SOON?
-# * Hook for running actions prior to setup
-# * Hooks for before_teardown, after_setup, on_error
-# * Options for positional control, eg, after_teardown :before_other_actions
-# * Provide tagging/filtering so action execution can be controlled specifically?
-#
-# == Usage
-#
-# Invoke TestCase.after_teardown with optional parameter, which will be invoked with a reference
-# to the test instance that has just been torn down.
-#
-# Example:
-# 
-#   Test::Unit::TestCase.after_teardown do |test|
-#     test.verify_mocks
-#   end
-#   
-# == Justification
-#
-# There are a number of tools and libraries that play fast-n-loose with setup and teardown by 
-# wrapping them, and by overriding method_added as a means of upholding special setup/teardown 
-# behavior, usually by re-wrapping newly defined user-level setup/teardown methods.
-# mocha and active_record/fixtures (and previously, hardmock) will fight for this
-# territory with often unpredictable results.
-#
-# We wouldn't have to battle if Test::Unit provided a formal pre- and post- hook mechanism.
-#
 module Test #:nodoc:#
   module Unit #:nodoc:#
+    
+    # == TestCase Modifications
+    #
+    # Monkey-patch to provide a formal mechanism for appending actions to be executed after teardown.
+    # Use after_teardown to define one or more actions to be executed after teardown for ALL tests.
+    #
+    # COMING SOON?
+    # * Hook for running actions prior to setup
+    # * Hooks for before_teardown, after_setup, on_error
+    # * Options for positional control, eg, after_teardown :before_other_actions
+    # * Provide tagging/filtering so action execution can be controlled specifically?
+    #
+    # == Usage
+    #
+    # Invoke TestCase.after_teardown with optional parameter, which will be invoked with a reference
+    # to the test instance that has just been torn down.
+    #
+    # Example:
+    # 
+    #   Test::Unit::TestCase.after_teardown do |test|
+    #     test.verify_mocks
+    #   end
+    #   
+    # == Justification
+    #
+    # There are a number of tools and libraries that play fast-n-loose with setup and teardown by 
+    # wrapping them, and by overriding method_added as a means of upholding special setup/teardown 
+    # behavior, usually by re-wrapping newly defined user-level setup/teardown methods.
+    # mocha and active_record/fixtures (and previously, hardmock) will fight for this
+    # territory with often unpredictable results.
+    #
+    # We wouldn't have to battle if Test::Unit provided a formal pre- and post- hook mechanism.
+    #
     class TestCase
 
       class << self
@@ -58,6 +59,25 @@ module Test #:nodoc:#
         def post_teardown_actions
           @@post_teardown_actions ||= []
         end
+
+        # Define an action to be run before setup. Subsequent calls result in 
+        # multiple actions, EACH BEING PREPENDED TO THE PREVIOUS.  
+        # The block will be given a reference to the test being executed.
+        #
+        # Example:
+        # 
+        #   Test::Unit::TestCase.before_setup do |test|
+        #     test.prepare_hardmock_control
+        #   end
+        def before_setup(&block)
+          pre_setup_actions.unshift block
+        end
+
+        # Used internally. Access the list of post teardown actions for to be
+        # used by all tests.
+        def pre_setup_actions
+          @@pre_setup_actions ||= []
+        end
       end
 
       # OVERRIDE: This is a reimplementation of the default "run", updated to
@@ -66,6 +86,7 @@ module Test #:nodoc:#
         yield(STARTED, name)
         @_result = result
         begin
+          execute_pre_setup_actions(self)
           setup
           __send__(@method_name)
         rescue Test::Unit::AssertionFailedError => e
@@ -104,6 +125,21 @@ module Test #:nodoc:#
             raise if should_passthru_exception($!)
             add_error($!)
           end
+        end
+      end
+      
+      # Run through the before_setup actions.
+      # Failures or errors cause execution to stop.
+      def execute_pre_setup_actions(test_instance)
+        self.class.pre_setup_actions.each do |action|
+#          begin
+            action.call test_instance
+#          rescue Test::Unit::AssertionFailedError => e
+#            add_failure(e.message, auxiliary_backtrace_filter(e.backtrace))
+#          rescue Exception
+#            raise if should_passthru_exception($!)
+#            add_error($!)
+#          end
         end
       end
 

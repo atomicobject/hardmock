@@ -9,91 +9,7 @@ require 'hardmock/expectation'
 require 'hardmock/expectation_builder'
 require 'hardmock/stubbing'
 
-
 module Hardmock
-
-  # Setup auto mock verification on teardown, being careful not to interfere
-  # with inherited, pre-mixed or post-added user teardowns.
-  def self.included(base) #:nodoc:#
-    base.class_eval do 
-      # Core of our actual setup behavior
-      def hardmock_setup
-        prepare_hardmock_control
-      end
-      
-      # Core of our actual teardown behavior
-      def hardmock_teardown
-        verify_mocks
-      end
-
-      # disable until later:
-      def self.method_added(symbol) #:nodoc:
-      end
-
-      if method_defined?(:setup) then
-        # Wrap existing setup
-        alias_method :old_setup, :setup
-        define_method(:new_setup) do
-          begin
-            hardmock_setup
-          ensure
-            old_setup
-          end
-        end
-      else
-        # We don't need to account for previous setup
-        define_method(:new_setup) do
-          hardmock_setup
-        end
-      end
-      alias_method :setup, :new_setup
-
-      if method_defined?(:teardown) then
-        # Wrap existing teardown
-        alias_method :old_teardown, :teardown
-        define_method(:new_teardown) do
-          begin
-            hardmock_teardown
-          ensure
-            old_teardown
-          end
-        end
-      else
-        # We don't need to account for previous teardown
-        define_method(:new_teardown) do
-          hardmock_teardown
-        end
-      end
-      alias_method :teardown, :new_teardown
-
-      def self.method_added(method) #:nodoc:
-        case method
-        when :teardown
-          unless method_defined?(:user_teardown)
-            alias_method :user_teardown, :teardown
-            define_method(:teardown) do
-              begin
-                new_teardown 
-              ensure
-                user_teardown
-              end
-            end
-          end
-        when :setup
-          unless method_defined?(:user_setup)
-            alias_method :user_setup, :setup
-            define_method(:setup) do
-              begin
-                new_setup 
-              ensure
-                user_setup
-              end
-            end
-          end
-        end
-      end
-    end
-  end
 
   # Create one or more new Mock instances in your test suite. 
   # Once created, the Mocks are accessible as instance variables in your test.
@@ -167,10 +83,4 @@ module Hardmock
 
 end
 
-# Insert Hardmock functionality into the TestCase base class
-require 'test/unit/testcase'
-unless Test::Unit::TestCase.instance_methods.include?('hardmock_teardown')
-  class Test::Unit::TestCase 
-    include Hardmock
-  end
-end
+require 'extend_test_unit'

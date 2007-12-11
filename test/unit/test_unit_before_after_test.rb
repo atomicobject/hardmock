@@ -2,6 +2,10 @@ require File.expand_path(File.dirname(__FILE__) + "/../test_helper")
 
 class TestUnitBeforeAfter < Test::Unit::TestCase
 
+  #
+  # after_teardown
+  #
+
   it "adds TestCase.after_teardown hook for appending post-teardown actions" do
     write_and_run_test :use_after_teardown => true
 
@@ -140,6 +144,75 @@ class TestUnitBeforeAfter < Test::Unit::TestCase
   end
 
   #
+  # before_setup
+  #
+
+  it "adds TestCase.before_setup hook for prepending pre-setup actions" do
+    write_and_run_test :use_before_setup => true
+    see_in_order "Loaded suite",
+      "3rd before_setup",
+      "2nd before_setup",
+      "1st before_setup",
+      "THE SETUP",
+      "A TEST",
+      "THE TEARDOWN",
+      "Finished in"
+    see_results :tests => 1, :assertions => 0, :failures => 0, :errors => 0
+  end
+
+  should "stop executing the test on the first failure withing a before_setup action" do 
+    write_and_run_test :use_before_setup => true, :flunk_in_before_setup => true
+    see_in_order "Loaded suite",
+      "3rd before_setup",
+      "2nd before_setup",
+      "FTHE TEARDOWN",
+      "1) Failure:",
+      "test_something(MyExampleTest) [_test_file_temp.rb:10]:",
+      "Flunk in 2nd before_setup."
+    see_results :tests => 1, :assertions => 1, :failures => 1, :errors => 0
+  end
+
+  should "stop executing the test on the first error within a before_setup action" do
+    write_and_run_test :use_before_setup => true, :raise_in_before_setup => true
+    see_in_order "Loaded suite",
+      "3rd before_setup",
+      "2nd before_setup",
+      "ETHE TEARDOWN",
+      "Finished in",
+      "test_something(MyExampleTest):",
+      "RuntimeError: Error in 2nd before_setup",
+      "_test_file_temp.rb:10",
+      "/hardmock/lib/test_unit_before_after.rb:136:in `call'"
+    see_results :tests => 1, :assertions => 0, :failures => 0, :errors => 1
+  end
+
+  it "will run before_setup actions in the absence of a regular setup" do
+    write_and_run_test :omit_setup => true, :use_before_setup => true
+    see_in_order "Loaded suite",
+      "3rd before_setup",
+      "2nd before_setup",
+      "1st before_setup",
+      "A TEST",
+      "THE TEARDOWN",
+      "Finished in"
+    see_results :tests => 1, :assertions => 0, :failures => 0, :errors => 0
+  end
+
+  it "allows before_setup and after_teardown to be used at the same time" do
+    write_and_run_test :use_before_setup => true, :use_after_teardown => true
+    see_in_order "Loaded suite",
+      "3rd before_setup",
+      "2nd before_setup",
+      "1st before_setup",
+      "A TEST",
+      "THE TEARDOWN",
+      "1st after_teardown",
+      "2nd after_teardown",
+      "Finished in"
+    see_results :tests => 1, :assertions => 0, :failures => 0, :errors => 0
+  end
+
+  #
   # HELPERS
   #
 
@@ -226,14 +299,49 @@ class TestUnitBeforeAfter < Test::Unit::TestCase
       test_method_code = generate_passing_test("test_something")
     end
 
+
     requires_for_ext = ''
-    after_teardowns = ''
-    if opts[:use_after_teardown]
+    if opts[:use_before_setup] or opts[:use_after_teardown]
       requires_for_ext =<<-RFE
         $: << "#{lib_dir}"
         require 'test_unit_before_after'
       RFE
+    end
 
+    before_setups = ''
+    if opts[:use_before_setup]
+      add_on_two = ""
+      if opts[:flunk_in_before_setup]
+        add_on_two = %{; test.flunk "Flunk in 2nd before_setup"}
+      elsif opts[:raise_in_before_setup]
+        add_on_two = %{; raise "Error in 2nd before_setup"}
+      end
+      before_setups =<<-BSTS
+        Test::Unit::TestCase.before_setup do |test| 
+          puts "1st before_setup"
+        end
+        Test::Unit::TestCase.before_setup do |test| 
+          puts "2nd before_setup" #{add_on_two}
+        end
+        Test::Unit::TestCase.before_setup do |test| 
+          puts "3rd before_setup"
+        end
+
+      BSTS
+    end
+
+
+    setup_code =<<-SC
+      def setup
+        puts "THE SETUP"
+      end
+    SC
+    if opts[:omit_setup]
+      setup_code = ""
+    end
+
+    after_teardowns = ''
+    if opts[:use_after_teardown]
       add_on_one = ""
       add_on_two = ""
       if opts[:flunk_in_after_teardown]
@@ -279,13 +387,10 @@ class TestUnitBeforeAfter < Test::Unit::TestCase
     require 'test/unit'
     #{requires_for_ext}
 
-    #{after_teardowns}
+    #{before_setups} #{after_teardowns}
     
     class MyExampleTest < Test::Unit::TestCase
-      def setup
-        puts "THE SETUP"
-      end
-
+      #{setup_code}
       #{teardown_code}
       #{test_method_code}
     end
