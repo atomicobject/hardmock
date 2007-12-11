@@ -11,10 +11,9 @@ module Test #:nodoc:#
     # Use after_teardown to define one or more actions to be executed after teardown for ALL tests.
     #
     # COMING SOON?
-    # * Hook for running actions prior to setup
-    # * Hooks for before_teardown, after_setup, on_error
-    # * Options for positional control, eg, after_teardown :before_other_actions
-    # * Provide tagging/filtering so action execution can be controlled specifically?
+    # * (maybe?) Hooks for before_teardown, after_setup, on_error
+    # * (maybe?) Options for positional control, eg, after_teardown :before_other_actions
+    # * (maybe?) Provide tagging/filtering so action execution can be controlled specifically?
     #
     # == Usage
     #
