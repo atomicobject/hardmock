@@ -182,7 +182,7 @@ class TestUnitBeforeAfter < Test::Unit::TestCase
       "test_something(MyExampleTest):",
       "RuntimeError: Error in 2nd before_setup",
       "_test_file_temp.rb:10",
-      "/hardmock/lib/test_unit_before_after.rb:", ":in `call'"
+      "/hardmock/lib/test_unit_before_after.rb:"
     see_results :tests => 1, :assertions => 0, :failures => 0, :errors => 1
   end
 
