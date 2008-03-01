@@ -313,6 +313,80 @@ class StubbingTest < Test::Unit::TestCase
     reset_stubs
   end
 
+  it "can mock several different class methods at once" do
+    sim_code = lambda do |input|
+      record = Multitool.find_record(input)
+      report = Multitool.generate_report(record)
+      Multitool.format_output(report)
+    end
+
+    @identifier = "the id"
+    @record = "the record"
+    @report = "the report"
+    @output = "the output"
+
+    Multitool.expects!(:find_record).with(@identifier).returns(@record)
+    Multitool.expects!(:generate_report).with(@record).returns(@report)
+    Multitool.expects!(:format_output).with(@report).returns(@output)
+
+    result = sim_code.call(@identifier)
+    assert_equal @output, result, "Wrong output"
+  end
+
+  it "can handle a mix of different and repeat class method mock calls" do
+    prep = lambda {
+      Multitool.expects!(:find_record).with("A").returns("1")
+      Multitool.expects!(:generate_report).with("1")
+      Multitool.expects!(:find_record).with("B").returns("2")
+      Multitool.expects!(:generate_report).with("2")
+    }
+
+    prep[]
+    Multitool.generate_report(Multitool.find_record("A"))
+    Multitool.generate_report(Multitool.find_record("B"))
+
+    prep[]
+    Multitool.generate_report(Multitool.find_record("A"))
+    assert_error Hardmock::ExpectationError, /Wrong arguments/, /find_record\("B"\)/, /find_record\("C"\)/ do
+      Multitool.generate_report(Multitool.find_record("C"))
+    end
+    clear_expectations
+  end
+
+  it "can mock several concrete instance methods at once" do
+    inst = OtherMultitool.new
+    sim_code = lambda do |input|
+      record = inst.find_record(input)
+      report = inst.generate_report(record)
+      inst.format_output(report)
+    end
+
+    @identifier = "the id"
+    @record = "the record"
+    @report = "the report"
+    @output = "the output"
+
+    inst.expects!(:find_record).with(@identifier).returns(@record)
+    inst.expects!(:generate_report).with(@record).returns(@report)
+    inst.expects!(:format_output).with(@report).returns(@output)
+
+    result = sim_code.call(@identifier)
+    assert_equal @output, result, "Wrong output"
+  end
+
+  it "verifies all concrete expects! from several different expectations" do
+    Multitool.expects!(:find_record)
+    Multitool.expects!(:generate_report)
+    Multitool.expects!(:format_output)
+
+    Multitool.find_record
+    Multitool.generate_report
+
+    assert_error Hardmock::VerifyError, /unmet expectations/i, /format_output/i do
+      verify_mocks
+    end
+  end
+
   it "will not allow expects! to be used on a mock object" do
     create_mock :cow
     assert_error Hardmock::StubbingError, /expects!/, /mock/i, /something/ do
@@ -374,6 +448,30 @@ class StubbingTest < Test::Unit::TestCase
   class Jug
     def self.pour
       "glug glug"
+    end
+  end
+
+  class Multitool
+    def self.find_record(*a)
+      raise "The real Multitool.find_record was called with #{a.inspect}"
+    end
+    def self.generate_report(*a)
+      raise "The real Multitool.generate_report was called with #{a.inspect}"
+    end
+    def self.format_output(*a)
+      raise "The real Multitool.format_output was called with #{a.inspect}"
+    end
+  end
+
+  class OtherMultitool
+    def find_record(*a)
+      raise "The real OtherMultitool#find_record was called with #{a.inspect}"
+    end
+    def generate_report(*a)
+      raise "The real OtherMultitool#generate_report was called with #{a.inspect}"
+    end
+    def format_output(*a)
+      raise "The real OtherMultitool#format_output was called with #{a.inspect}"
     end
   end
 

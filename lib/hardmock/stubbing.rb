@@ -109,16 +109,22 @@ module Hardmock
 
       method_name = method_name.to_s
 
-      if @_my_mock.nil?
-        @_my_mock = Mock.new(_my_name, $main_mock_control)
+      @_my_mock = Mock.new(_my_name, $main_mock_control) if @_my_mock.nil?
+
+      unless Hardmock.has_replaced_method?(self, method_name)
+        # Track the method as replaced
         Hardmock::ReplacedMethod.new(self, method_name)
 
-        if methods.include?(method_name.to_s)
+        # Preserver original implementation of the method by aliasing it away
+        if methods.include?(method_name)
           hm_meta_eval do 
             alias_method "_hardmock_original_#{method_name}".to_sym, method_name.to_sym
           end
         end
 
+        # Re-define the method to utilize our patron mock instance.
+        # (This global-temp-var thing is hokey but I was having difficulty generating 
+        # code for the meta class.)
         begin
           $method_text_temp = %{
             def #{method_name}(*args,&block)
@@ -131,7 +137,6 @@ module Hardmock
         ensure
           $method_text_temp = nil
         end
-
       end
 
       return @_my_mock.expects(method_name, *args, &block)
