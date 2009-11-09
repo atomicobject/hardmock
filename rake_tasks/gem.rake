@@ -11,7 +11,7 @@ namespace :gem do
     s.platform = Gem::Platform::RUBY
     s.summary = "A strict, ordered, expectation-oriented mock object library."
     s.rubyforge_project = 'hardmock'
-    s.homepage = "http://hardmock.rubyforge.org"
+    s.homepage = "http://atomicobject.github.com/hardmock"
     s.autorequire =  'hardmock'
 
     s.files = FileList[
