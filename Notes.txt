@@ -3,11 +3,14 @@ crosby
 
 1. Edit page_header.graffle
 2. Export as HTML imagemap
-3. Open ../sample_code/synopsis.rb
+
+# Only if you need to update the code sample:
+3. Open demo.rb
 4. Screen shot, save as sample_code.png
+
 5. rake (rewrites index.html)
-6. cd ..
-7. rake publish_docs
+6. git ci -m "I changed it"
+7. git push
 
 page_header.graffle
   Export-as-HTML-Imagemap
