@@ -27,7 +27,7 @@ namespace :gem do
     s.test_files = Dir.glob("test/**/*test.rb")
 
     s.has_rdoc = true
-    s.extra_rdoc_files = ["README","CHANGES","LICENSE"]
+    s.extra_rdoc_files = ["README.rdoc","CHANGES","LICENSE"]
     add_rdoc_options(s.rdoc_options)
   end
 
