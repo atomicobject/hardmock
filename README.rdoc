@@ -49,9 +49,10 @@ Expects <tt>@garage.open_door</tt>, <tt>@car.start(:choke)</tt> and <tt>@car.dri
 
 == Download and Install
 
-* =gem install hardmock=
+* Install: gem install hardmock
 * Homepage: http://atomicobject.github.com/hardmock
 * Rubygems.org: http://rubygems.org/gems/hardmock
+* API documentation: http://rubydoc.info/gems/hardmock/1.3.7/frames
 
 == Setup for Test::Unit
 
