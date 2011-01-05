@@ -9,7 +9,7 @@ namespace :gem do
     s.author = "David Crosby"
     s.email = "crosby@atomicobject.com"
     s.platform = Gem::Platform::RUBY
-    s.summary = "A strict, ordered, expectation-oriented mock object library."
+    s.summary = "A strict, ordered, expectation-oriented mock object library. DISCONTINUED AS OF JAN 2011, see Readme"
     s.rubyforge_project = 'hardmock'
     s.homepage = "http://atomicobject.github.com/hardmock"
     s.autorequire =  'hardmock'
