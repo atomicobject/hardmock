@@ -2,7 +2,7 @@ desc "Rewrite index.html"
 task :index do
   require 'erb'
   @title = "Hardmock - mock objects for Ruby"
-  @plugin_install = "script/plugin install git@github.com:atomicobject/hardmock.git"
+  @plugin_install = ""
   @header_html = File.read("page_header.html")
   html = ERB.new(File.read("index.erb")).result(binding)
   fname = "index.html"
