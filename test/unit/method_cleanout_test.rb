@@ -17,7 +17,6 @@ class MethodCleanoutTest < Test::Unit::TestCase
         Hardmock::MethodCleanout::SACRED_METHODS.include?(m)
       }
       expect_removed.each do |m|
-        puts ">>> Checking method #{m}<<<"
         assert !@victim.respond_to?(m), "should not have method #{m}"
       end
     end
